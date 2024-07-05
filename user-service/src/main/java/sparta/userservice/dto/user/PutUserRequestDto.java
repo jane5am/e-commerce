@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class PutUserRequestDto {
-    private Long userId;
+    private int userId;
     private String email;
 }
