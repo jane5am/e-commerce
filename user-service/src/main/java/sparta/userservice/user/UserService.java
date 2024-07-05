@@ -88,7 +88,7 @@ public class UserService {
 
 
     // id로 유저 찾기
-    public Optional<User> getUserById(Long userId) throws BadRequestException {
+    public Optional<User> getUserById(int userId) throws BadRequestException {
 
         Optional<User> user = userRepository.findById(userId);
         if (!user.isPresent()) {
@@ -117,7 +117,7 @@ public class UserService {
 
 
     // 회원삭제
-    public void deleteUser(Long userId) {
+    public void deleteUser(int userId) {
 
         if (!userRepository.existsById(userId)) {
             throw new RuntimeException("User not found with id: " + userId);

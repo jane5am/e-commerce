@@ -94,7 +94,7 @@ public class UserController {
 
     // id로 유저 찾기
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseMessage> getUserById(@PathVariable("id") Long id) throws BadRequestException {
+    public ResponseEntity<ResponseMessage> getUserById(@PathVariable("id") int id) throws BadRequestException {
 
         Optional<User> user = userService.getUserById(id);
 
@@ -125,7 +125,7 @@ public class UserController {
 
     // 회원삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseMessage> deleteUser(@PathVariable("id") Long id) {
+    public ResponseEntity<ResponseMessage> deleteUser(@PathVariable("id") int id) {
 
         userService.deleteUser(id);
 

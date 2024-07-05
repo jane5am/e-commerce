@@ -25,6 +25,7 @@ public class User {
     @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private String type;// 카카오인지 네이버인지
 
     @Enumerated(EnumType.STRING)
