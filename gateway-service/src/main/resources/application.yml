@@ -21,7 +21,13 @@ spring:
           filters:
             - StripPrefix=1
             - name: JwtFilter
-
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/product-service/**
+          filters:
+            - StripPrefix=1
+            - name: JwtFilter
       default-filters:
         - name: GlobalFilter
           args:
