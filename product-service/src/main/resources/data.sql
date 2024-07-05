@@ -1,0 +1,1 @@
+insert into product(sellerId,name,price,description,isDelete,status) values(1, "name", 10000, "설명, "Y", "Y"")
