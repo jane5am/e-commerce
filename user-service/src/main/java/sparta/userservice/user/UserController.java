@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,6 @@ import sparta.userservice.dto.user.PutUserRequestDto;
 import sparta.userservice.dto.user.UserCommonDto;
 import sparta.userservice.jwt.JwtBlacklist;
 import sparta.userservice.security.UserDetailsImpl;
-import sparta.userservice.utils.JwtUtil;
 
 import java.util.Base64;
 import java.util.List;
@@ -26,10 +25,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-    private final JwtUtil jwtUtil;
+    private final UserService userService;
     private final JwtBlacklist jwtBlacklist;
+    private Environment env;
+
+
+    @GetMapping("/health-check")
+    public String status() {
+        return String.format("It's Working in User Service in PORT %s",
+                env.getProperty("local.server.port"));
+    }
+
 
     // 회원가입
     @PostMapping("/signup")
@@ -157,7 +163,7 @@ public class UserController {
     }
 
     @PostMapping("/user-info")
-    public ResponseEntity<ResponseMessage> getUserInfo( @AuthenticationPrincipal UserDetailsImpl userDetails ) {
+    public ResponseEntity<ResponseMessage> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         //이 어노테이션은 jwt토큰으로 사용자의 정보를 알아내야할때!
         User user = userDetails.getUser();
         ResponseMessage response = ResponseMessage.builder()
