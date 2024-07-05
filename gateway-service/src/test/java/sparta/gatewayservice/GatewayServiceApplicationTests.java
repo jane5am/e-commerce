@@ -1,13 +1,13 @@
-package sparta.ecommerce;
+package sparta.gatewayservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ECommerceApplicationTests {
+class GatewayServiceApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

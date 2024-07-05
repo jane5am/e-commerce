@@ -1,10 +1,10 @@
-package sparta.ecommerce;
+package sparta.productservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ECommerceApplicationTests {
+class ProductServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
