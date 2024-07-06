@@ -1,6 +1,5 @@
 package sparta.userservice.security;
 
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,43 +12,35 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import sparta.userservice.utils.JwtUtil;
 
 import java.io.IOException;
 
 @Slf4j(topic = "JWT 검증 및 인가")
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
 
-    public JwtAuthorizationFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
-        this.jwtUtil = jwtUtil;
+    public JwtAuthorizationFilter(UserDetailsServiceImpl userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
 
-        String tokenValue = jwtUtil.getJwtFromHeader(req);
+        // 헤더에서 userId와 role을 추출
+        String userIdStr = req.getHeader("x-claim-userid");
+        String role = req.getHeader("x-claim-role");
 
-        if (StringUtils.hasText(tokenValue)) {
-
-            if (!jwtUtil.validateToken(tokenValue)) {
-                log.error("Token Error");
-                return;
-            }
-
-            Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
-            String username = info.get("username", String.class);
-            String role = info.get("role", String.class);
-
+        if (StringUtils.hasText(userIdStr) && StringUtils.hasText(role)) {
             try {
-                setAuthentication(username, role);
+                setAuthentication(userIdStr, role);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 return;
             }
+        } else {
+            log.error("Missing userId, role or username in headers");
+            return;
         }
 
         filterChain.doFilter(req, res);

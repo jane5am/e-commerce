@@ -15,10 +15,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
-        User user = userRepository.findByName(name)
-                .orElseThrow(() -> new UsernameNotFoundException("Not Found " + name));
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        try {
+            Integer userIdInt = Integer.parseInt(userId);
+            User user = userRepository.findById(userIdInt)
+                    .orElseThrow(() -> new UsernameNotFoundException("Not Found " + userId));
 
-        return new UserDetailsImpl(user);
+            return new UserDetailsImpl(user);
+        } catch (NumberFormatException e) {
+            throw new UsernameNotFoundException("Invalid userId format: " + userId);
+        }
     }
 }
