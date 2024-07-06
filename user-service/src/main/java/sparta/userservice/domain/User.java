@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "`user`")
 @Data
@@ -21,10 +23,13 @@ public class User {
     private String name;
 
     @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
-    private String email;
+    private String emailVerified;
 
     @Column(nullable = false)
     private String type;// 카카오인지 네이버인지
@@ -36,7 +41,7 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.role = Role.USER;
-//        this.type = "web";
+        this.emailVerified = emailVerified;
     }
 
     public enum Role {
@@ -44,10 +49,11 @@ public class User {
     }
 
     public User(String email, String name, String type) {
-        this.password = "Passw0rd";
+        this.password = "password";
         this.name = name;
         this.email = email;
         this.type = type;
         this.role = Role.USER;
     }
+
 }

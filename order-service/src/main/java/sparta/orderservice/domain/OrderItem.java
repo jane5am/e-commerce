@@ -32,10 +32,4 @@ public class OrderItem extends CommonEntity {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "unitPrice", nullable = false)
-    private int unitPrice;
-
-    @Column(name = "totalStm", nullable = false)
-    private int totalSum;
-
 }
