@@ -1,4 +1,4 @@
-package sparta.userservice.jwt;
+package sparta.userservice.provider.jwt;
 
 import org.springframework.stereotype.Component;
 

@@ -14,7 +14,7 @@ import sparta.userservice.dto.user.CreateUserRequestDto;
 import sparta.userservice.dto.user.PutUserRequestDto;
 import sparta.userservice.dto.user.SendEmailRequestDto;
 import sparta.userservice.dto.user.UserCommonDto;
-import sparta.userservice.jwt.JwtBlacklist;
+import sparta.userservice.provider.jwt.JwtBlacklist;
 import sparta.userservice.security.UserDetailsImpl;
 
 import java.util.Base64;

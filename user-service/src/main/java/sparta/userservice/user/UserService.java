@@ -3,7 +3,6 @@ package sparta.userservice.user;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sparta.userservice.domain.User;
@@ -11,7 +10,7 @@ import sparta.userservice.dto.user.CreateUserRequestDto;
 import sparta.userservice.dto.user.PutUserRequestDto;
 import sparta.userservice.dto.user.SendEmailRequestDto;
 import sparta.userservice.dto.user.UserCommonDto;
-import sparta.userservice.provider.EmailProvider;
+import sparta.userservice.provider.email.EmailProvider;
 import sparta.userservice.utils.GenerateCertificationNumberUtil;
 import sparta.userservice.utils.JwtUtil;
 
