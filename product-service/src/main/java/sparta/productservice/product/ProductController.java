@@ -3,10 +3,7 @@ package sparta.productservice.product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sparta.productservice.domain.Product;
 import sparta.productservice.dto.ResponseMessage;
 import sparta.productservice.dto.product.ProductDto;
@@ -26,7 +23,7 @@ public class ProductController {
         return String.format("It's Working in Product Service in PORT %s", env.getProperty("local.server.port"));
     }
 
-    @GetMapping("/product")
+    @GetMapping("/products")
     public ResponseEntity<ResponseMessage> getAllProducts() {
         List<Product> products = productService.getAllProducts();
         ResponseMessage response = ResponseMessage.builder()
@@ -39,11 +36,42 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductDto>> getProductsByIds(@RequestParam("ids") List<Integer> productIds) {
-        System.out.println("productIds = " + productIds);
         List<Product> products = productService.getProductsByIds(productIds);
         List<ProductDto> productDtos = products.stream()
                 .map(product -> new ProductDto(product.getProductId(), product.getName(), product.getPrice(), product.getDescription(), product.getExposeYsno()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(productDtos);
+    }
+
+    @PostMapping
+    public ResponseEntity<ResponseMessage> createProduct(@RequestBody ProductDto productDto) {
+        Product product = productService.createProduct(productDto);
+        ResponseMessage response = ResponseMessage.builder()
+                .data(product)
+                .statusCode(201)
+                .resultMessage("Product created successfully")
+                .build();
+        return ResponseEntity.status(201).body(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseMessage> updateProduct(@PathVariable("id") int id, @RequestBody ProductDto productDto) {
+        Product updatedProduct = productService.updateProduct(id, productDto);
+        ResponseMessage response = ResponseMessage.builder()
+                .data(updatedProduct)
+                .statusCode(200)
+                .resultMessage("Product updated successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable("id") int id) {
+        productService.deleteProduct(id);
+        ResponseMessage response = ResponseMessage.builder()
+                .statusCode(200)
+                .resultMessage("Product deleted successfully")
+                .build();
+        return ResponseEntity.ok(response);
     }
 }
