@@ -17,7 +17,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
       naming:
         physical-strategy: sparta.productservice.config.CustomPhysicalNamingStrategy
 
