@@ -8,8 +8,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import sparta.userservice.client.ProductServiceClient;
+import sparta.userservice.client.OrderServiceClient;
 import sparta.userservice.domain.User;
+import sparta.userservice.domain.WishList;
 import sparta.userservice.dto.ResponseMessage;
+import sparta.userservice.dto.product.ProductDto;
+import sparta.userservice.dto.order.OrderDto;
 import sparta.userservice.dto.user.CreateUserRequestDto;
 import sparta.userservice.dto.user.PutUserRequestDto;
 import sparta.userservice.dto.user.SendEmailRequestDto;
@@ -20,6 +25,7 @@ import sparta.userservice.security.UserDetailsImpl;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -28,8 +34,9 @@ public class UserController {
 
     private final UserService userService;
     private final JwtBlacklist jwtBlacklist;
+    private final ProductServiceClient productServiceClient;
+    private final OrderServiceClient orderServiceClient;
     private Environment env;
-
 
     @GetMapping("/health-check")
     public String status() {
@@ -37,11 +44,9 @@ public class UserController {
                 env.getProperty("local.server.port"));
     }
 
-
     // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<ResponseMessage> createUser(@RequestBody CreateUserRequestDto createUserRequestDto) throws BadRequestException {
-
         User createdUser = userService.createUser(createUserRequestDto);
 
         ResponseMessage response = ResponseMessage.builder()
@@ -52,7 +57,6 @@ public class UserController {
 
         return ResponseEntity.status(201).body(response);
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<ResponseMessage> login(@RequestBody UserCommonDto userCommonDto, HttpServletResponse response) throws BadRequestException {
@@ -78,15 +82,13 @@ public class UserController {
         return ResponseEntity.ok(responseMessage);
     }
 
-
     // 이메일 인증
     @PostMapping("/email-certification")
-    public ResponseEntity<ResponseMessage> emailCertification (@RequestBody SendEmailRequestDto sendEmailRequestDto) throws BadRequestException {
-
+    public ResponseEntity<ResponseMessage> emailCertification(@RequestBody SendEmailRequestDto sendEmailRequestDto) throws BadRequestException {
         userService.emailCertification(sendEmailRequestDto);
 
         ResponseMessage responseMessage = ResponseMessage.builder()
-                .data("이메일 인증 성공입니다!") // 토큰 다시 준거
+                .data("이메일 인증 성공입니다!")
                 .statusCode(200)
                 .resultMessage("email-certification successful")
                 .build();
@@ -94,11 +96,9 @@ public class UserController {
         return ResponseEntity.ok(responseMessage);
     }
 
-
     // 유저 전체 조회
     @GetMapping
     public ResponseEntity<ResponseMessage> getAllUsers() {
-
         List<User> users = userService.getAllUsers();
 
         ResponseMessage response = ResponseMessage.builder()
@@ -113,7 +113,6 @@ public class UserController {
     // id로 유저 찾기
     @GetMapping("/{id}")
     public ResponseEntity<ResponseMessage> getUserById(@PathVariable("id") int id) throws BadRequestException {
-
         Optional<User> user = userService.getUserById(id);
 
         ResponseMessage response = ResponseMessage.builder()
@@ -125,12 +124,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-
-    //회원 수정
+    // 회원 수정
     @PutMapping()
     public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserRequestDto putUserRequestDto) {
-
-        User updatedUser = userService.updateUser(putUserRequestDto); //exception은 서비스에서 내주기
+        User updatedUser = userService.updateUser(putUserRequestDto); // exception은 서비스에서 내주기
 
         ResponseMessage response = ResponseMessage.builder()
                 .data(updatedUser)
@@ -140,11 +137,9 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-
-    // 회원삭제
+    // 회원 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseMessage> deleteUser(@PathVariable("id") int id) {
-
         userService.deleteUser(id);
 
         ResponseMessage response = ResponseMessage.builder()
@@ -182,7 +177,7 @@ public class UserController {
 
     @PostMapping("/user-info")
     public ResponseEntity<ResponseMessage> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        //이 어노테이션은 jwt토큰으로 사용자의 정보를 알아내야할때!
+        // 이 어노테이션은 jwt토큰으로 사용자의 정보를 알아내야할때!
         User user = userDetails.getUser();
         ResponseMessage response = ResponseMessage.builder()
                 .data(user.getEmail())
@@ -191,5 +186,18 @@ public class UserController {
                 .build();
         return ResponseEntity.ok(response);
     }
+    
+    // 주문한 상품 상태 조회
+    @GetMapping("/{id}/orders")
+    public ResponseEntity<ResponseMessage> getUserOrders(@PathVariable("id") int id) throws BadRequestException {
+        List<OrderDto> orders = orderServiceClient.getOrdersByUserId(id);
 
+        ResponseMessage response = ResponseMessage.builder()
+                .data(orders)
+                .statusCode(200)
+                .resultMessage("Orders retrieved successfully")
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 }
