@@ -41,7 +41,7 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.role = Role.USER;
-        this.emailVerified = emailVerified;
+        this.emailVerified = "N";
     }
 
     public enum Role {

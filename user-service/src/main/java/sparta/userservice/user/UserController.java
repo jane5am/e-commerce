@@ -12,6 +12,7 @@ import sparta.userservice.domain.User;
 import sparta.userservice.dto.ResponseMessage;
 import sparta.userservice.dto.user.CreateUserRequestDto;
 import sparta.userservice.dto.user.PutUserRequestDto;
+import sparta.userservice.dto.user.SendEmailRequestDto;
 import sparta.userservice.dto.user.UserCommonDto;
 import sparta.userservice.jwt.JwtBlacklist;
 import sparta.userservice.security.UserDetailsImpl;
@@ -76,6 +77,23 @@ public class UserController {
 
         return ResponseEntity.ok(responseMessage);
     }
+
+
+    // 이메일 인증
+    @PostMapping("/email-certification")
+    public ResponseEntity<ResponseMessage> emailCertification (@RequestBody SendEmailRequestDto sendEmailRequestDto) throws BadRequestException {
+
+        userService.emailCertification(sendEmailRequestDto);
+
+        ResponseMessage responseMessage = ResponseMessage.builder()
+                .data("이메일 인증 성공입니다!") // 토큰 다시 준거
+                .statusCode(200)
+                .resultMessage("email-certification successful")
+                .build();
+
+        return ResponseEntity.ok(responseMessage);
+    }
+
 
     // 유저 전체 조회
     @GetMapping
@@ -173,4 +191,5 @@ public class UserController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
 }
