@@ -18,6 +18,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+      naming:
+        physical-strategy: sparta.productservice.config.CustomPhysicalNamingStrategy
+
     properties:
       hibernate:
         dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.MySQLDialect}
