@@ -27,6 +27,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
 
+        // 로그인 경로에 대한 예외 처리
+        String loginPath = "/api/v1/user/login";
+        if (req.getRequestURI().equals(loginPath)) {
+            filterChain.doFilter(req, res);
+            return;
+        }
+
         // 헤더에서 userId와 role을 추출
         String userIdStr = req.getHeader("x-claim-userid");
         String role = req.getHeader("x-claim-role");
@@ -39,7 +46,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            log.error("Missing userId, role or username in headers");
+            log.error("Missing userId or role in headers");
             return;
         }
 
