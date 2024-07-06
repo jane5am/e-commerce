@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: ${SPRING_APPLICATION_NAME:product-service}
+    name: ${SPRING_APPLICATION_NAME:order-service}
 
   cloud:
     inetutils:
@@ -17,10 +17,9 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+      ddl-auto: ${HIBERNATE_DDL_AUTO:create}
       naming:
-        physical-strategy: sparta.productservice.config.CustomPhysicalNamingStrategy
-
+        physical-strategy: sparta.orderservice.config.CustomPhysicalNamingStrategy
     properties:
       hibernate:
         dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.MySQLDialect}

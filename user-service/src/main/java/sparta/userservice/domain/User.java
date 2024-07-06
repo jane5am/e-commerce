@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "`user`")
 @Data
 @AllArgsConstructor // 지정하는 모든 필드에 대해 생성자 만들어줌
 @NoArgsConstructor // 매개변수 없는 생성자 만들어줌
@@ -48,6 +49,5 @@ public class User {
         this.email = email;
         this.type = type;
         this.role = Role.USER;
-
     }
 }

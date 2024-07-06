@@ -1,0 +1,82 @@
+version: '3.8'
+services:
+  eureka-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/commerce
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - JWT_SECRET_KEY=7Leo7JeF7L2U7Iqk7ZmU7J207YyF7ZW064u56rWQ7Jyh6rO87KCV7J2E64Gd64K06rOg64KY66m06ryt7Leo7JeF7ZWY7Iuk7IiY7J6I7J2E6rKB64uI64ukLg==
+      - SPRING_APPLICATION_NAME=user-service
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    depends_on:
+      db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+
+  gateway-service:
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8000
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_APPLICATION_NAME=gateway-service
+      - JWT_SECRET_KEY=7Leo7JeF7L2U7Iqk7ZmU7J207YyF7ZW064u56rWQ7Jyh6rO87KCV7J2E64Gd64K06rOg64KY66m06ryt7Leo7JeF7ZWY7Iuk7IiY7J6I7J2E6rKB64uI64ukLg==
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/commerce
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - JWT_SECRET_KEY=7Leo7JeF7L2U7Iqk7ZmU7J207YyF7ZW064u56rWQ7Jyh6rO87KCV7J2E64Gd64K06rOg64KY66m06ryt7Leo7JeF7ZWY7Iuk7IiY7J6I7J2E6rKB64uI64ukLg==
+      - SPRING_APPLICATION_NAME=product-service
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+      - HIBERNATE_DDL_AUTO=create-drop
+    depends_on:
+      db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: commerce
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
