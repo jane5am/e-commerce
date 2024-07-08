@@ -16,6 +16,12 @@ public class WishListService {
 
     private final WishListRepository wishListRepository;
 
+    /**
+     * 특정 사용자 ID로 WishList 조회
+     *
+     * @param userId 사용자 ID
+     * @return 사용자 WishList 목록
+     */
     public List<WishList> getUserWishList(int userId) {
         return wishListRepository.findByUserId(userId);
     }
