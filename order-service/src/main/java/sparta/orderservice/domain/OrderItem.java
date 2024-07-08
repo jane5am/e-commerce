@@ -1,5 +1,6 @@
 package sparta.orderservice.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,5 +32,11 @@ public class OrderItem extends CommonEntity {
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipmentId", insertable = false, updatable = false)
+    @JsonBackReference
+    private Shipment shipment;
+
 
 }

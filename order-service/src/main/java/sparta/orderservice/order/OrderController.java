@@ -1,11 +1,11 @@
 package sparta.orderservice.order;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sparta.orderservice.domain.Order;
+import sparta.orderservice.dto.OrderItemDTO;
 
 import java.util.List;
 
@@ -17,33 +17,29 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    // 유저 아이디로 주문 목록 조회
+    // userId로 주문목록 조회
     @GetMapping("/getOrderList")
-    public List<Order> getUserOrders( HttpServletRequest request) {
-        String userIdHeader = request.getHeader("x-claim-userid");
-        System.out.println("userIdHeader = " + userIdHeader);
-        if (userIdHeader == null) {
-            throw new RuntimeException("Missing user ID in headers");
-        }
-
-        int userId;
-        try {
-            userId = Integer.parseInt(userIdHeader);
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid user ID format in headers");
-        }
-
+    public List<Order> getUserOrders(HttpServletRequest request) {
+        int userId = extractUserIdFromRequest(request);
         return orderService.getOrdersByUserId(userId);
     }
 
+    // orderId로 상태 조회
+    @GetMapping("/items/{orderId}")
+    public List<OrderItemDTO> getOrderItems(@PathVariable("orderId") int orderId) {
+        return orderService.getOrderItems(orderId);
+    }
 
-    // 취소하기
-    @PostMapping("/cancel")
-    public Order cancelOrder( HttpServletRequest request) {
+    // orderItemId로 상태 조회
+    @GetMapping("/status/{orderItemId}")
+    public String getShipmentStatus(@PathVariable("orderItemId") int orderItemId) {
+        return orderService.getShipmentStatus(orderItemId);
+    }
 
+
+//24시전 && 주문완료인 상태일때
+    private int extractUserIdFromRequest(HttpServletRequest request) {
         String userIdHeader = request.getHeader("x-claim-userid");
-        System.out.println("userIdHeader = " + userIdHeader);
-
         if (userIdHeader == null) {
             throw new RuntimeException("Missing user ID in headers");
         }
@@ -55,12 +51,6 @@ public class OrderController {
             throw new RuntimeException("Invalid user ID format in headers");
         }
 
-        try {
-            return orderService.cancelOrder(userId);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-
+        return userId;
     }
-
 }
