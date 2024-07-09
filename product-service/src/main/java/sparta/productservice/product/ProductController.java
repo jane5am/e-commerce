@@ -3,9 +3,8 @@ package sparta.productservice.product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sparta.orderservice.dto.UpdateStockRequest;
 import sparta.productservice.domain.Product;
 import sparta.productservice.dto.ResponseMessage;
 
@@ -37,4 +36,12 @@ public class ProductController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/update-stock")
+    public void updateStock(@RequestBody UpdateStockRequest updateStockRequest){
+        System.out.println("updateStockRequest.getProductId() : " +updateStockRequest.getProductId());
+        System.out.println("updateStockRequest.getQuantity() : " + updateStockRequest.getQuantity());
+        productService.updateStock(updateStockRequest);
+    };
+
 }

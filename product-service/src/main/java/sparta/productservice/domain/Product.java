@@ -30,6 +30,9 @@ public class Product extends CommonEntity {
     private int price;
 
     @Column(nullable = false)
+    private int quantity;
+
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)

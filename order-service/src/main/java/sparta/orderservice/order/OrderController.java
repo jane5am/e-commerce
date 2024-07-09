@@ -4,8 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import sparta.orderservice.client.ProductServiceClient;
 import sparta.orderservice.domain.Order;
 import sparta.orderservice.dto.OrderItemDTO;
+import sparta.orderservice.dto.dtodto;
 
 import java.util.List;
 
@@ -17,6 +19,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+
     // userId로 주문목록 조회
     @GetMapping("/getOrderList")
     public List<Order> getUserOrders(HttpServletRequest request) {
@@ -24,20 +27,6 @@ public class OrderController {
         return orderService.getOrdersByUserId(userId);
     }
 
-    // orderId로 상태 조회
-    @GetMapping("/items/{orderId}")
-    public List<OrderItemDTO> getOrderItems(@PathVariable("orderId") int orderId) {
-        return orderService.getOrderItems(orderId);
-    }
-
-    // orderItemId로 상태 조회
-    @GetMapping("/status/{orderItemId}")
-    public String getShipmentStatus(@PathVariable("orderItemId") int orderItemId) {
-        return orderService.getShipmentStatus(orderItemId);
-    }
-
-
-//24시전 && 주문완료인 상태일때
     private int extractUserIdFromRequest(HttpServletRequest request) {
         String userIdHeader = request.getHeader("x-claim-userid");
         if (userIdHeader == null) {
@@ -53,4 +42,29 @@ public class OrderController {
 
         return userId;
     }
+
+    // orderId로 상태 조회
+    @GetMapping("/items/{orderId}")
+    public List<OrderItemDTO> getOrderItems(@PathVariable("orderId") int orderId) {
+        return orderService.getOrderItems(orderId);
+    }
+
+    // orderItemId로 상태 조회
+    @GetMapping("/status/{orderItemId}")
+    public String getShipmentStatus(@PathVariable("orderItemId") int orderItemId) {
+        return orderService.getShipmentStatus(orderItemId);
+    }
+
+
+    // 주문 하기
+    @PostMapping("/place-order")
+    public void placeOrder(HttpServletRequest request,@RequestBody dtodto dtodto ) {
+        int userId = extractUserIdFromRequest(request);
+        System.out.println("111");
+        orderService.placeOrder(userId, dtodto.getProductId(), dtodto.getQuantity());
+    }
+
+
+//24시전 && 주문완료인 상태일때
+
 }
