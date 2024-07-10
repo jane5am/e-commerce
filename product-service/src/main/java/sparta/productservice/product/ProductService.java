@@ -2,8 +2,7 @@ package sparta.productservice.product;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import sparta.orderservice.domain.OrderItem;
-import sparta.orderservice.dto.UpdateStockRequest;
+import sparta.orderservice.dto.ProductDto;
 import sparta.productservice.domain.Product;
 
 import java.time.LocalDateTime;
@@ -19,10 +18,10 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public void updateStock(UpdateStockRequest updateStockRequest) {
-        Product product = productRepository.findById(updateStockRequest.getProductId())
+    public void updateStock(ProductDto productDto) {
+        Product product = productRepository.findById(productDto.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-        int newStock = product.getQuantity() - updateStockRequest.getQuantity();
+        int newStock = product.getQuantity() - productDto.getQuantity();
         if (newStock < 0) {
             throw new RuntimeException("Not enough stock available");
         }
@@ -30,4 +29,11 @@ public class ProductService {
         product.setUpdatedAt(LocalDateTime.now());
         productRepository.save(product);
     }
+
+    public int getProductPrice(int productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        return product.getPrice();
+    }
+
 }

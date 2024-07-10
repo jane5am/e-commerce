@@ -8,8 +8,8 @@ import sparta.orderservice.domain.Order;
 import sparta.orderservice.domain.OrderItem;
 import sparta.orderservice.domain.Payment;
 import sparta.orderservice.domain.Shipment;
-import sparta.orderservice.dto.OrderItemDTO;
-import sparta.orderservice.dto.UpdateStockRequest;
+import sparta.orderservice.dto.OrderItemDto;
+import sparta.orderservice.dto.ProductDto;
 
 import java.util.Date;
 import java.util.List;
@@ -40,12 +40,12 @@ public class OrderService {
         return orderRepository.findByUserId(userId);
     }
 
-    public List<OrderItemDTO> getOrderItems(int orderId) {
+    public List<OrderItemDto> getOrderItems(int orderId) {
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
         return orderItems.stream().map(orderItem -> {
             Shipment shipment = shipmentRepository.findById(orderItem.getShipmentId())
                     .orElseThrow(() -> new RuntimeException("Shipment not found"));
-            return new OrderItemDTO(
+            return new OrderItemDto(
                     orderItem.getId(),
                     orderItem.getOrderId(),
                     orderItem.getProductId(),
@@ -66,9 +66,7 @@ public class OrderService {
 
 
     public void placeOrder(int userId, int productId, int quantity) {
-        System.out.println("userId : " + userId);
-        System.out.println("productId : " + productId);
-        System.out.println("quantity : " + quantity);
+
         // 주문 생성
         Order order = new Order();
         order.setUserId(userId);
@@ -89,28 +87,20 @@ public class OrderService {
         orderItem.setQuantity(quantity);
         orderItemRepository.save(orderItem);
 
-        System.out.println("여기!");
         // 재고 업데이트
-        UpdateStockRequest updateStockRequest = new UpdateStockRequest(productId, quantity);
-        productServiceClient.updateStock(updateStockRequest);
-
-        System.out.println("여기!22222");
+        ProductDto productDto = new ProductDto(productId, quantity);
+        productServiceClient.updateStock(productDto);
 
         // 결제 정보 생성
+        int productPrice = productServiceClient.getProductPrice(productId);
+
         Payment payment = new Payment();
         payment.setOrderId(order.getId());
         payment.setPaymentDate(new Date());
-        payment.setPrice(quantity * getProductPrice(productId)); // 상품 가격 * 수량
+        payment.setPrice(quantity * productPrice); // 상품 가격 * 수량
         payment.setPaymentMethod("card");
         paymentRepository.save(payment);
     }
 
-    private int getProductPrice(int productId) {
-        // 여기서는 상품의 가격을 가져오는 로직을 간단히 구현합니다.
-        // 실제로는 ProductService를 통해 가격을 가져와야 합니다.
-        // ProductServiceClient에서 상품의 가격을 가져오는 메서드를 추가할 수 있습니다.
-        // 이 예제에서는 임시로 1000을 반환합니다.
-        return 1000;
-    }
 
 }

@@ -3,11 +3,12 @@ package sparta.orderservice.order;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sparta.orderservice.client.ProductServiceClient;
+import sparta.orderservice.ResponseMessage;
 import sparta.orderservice.domain.Order;
-import sparta.orderservice.dto.OrderItemDTO;
-import sparta.orderservice.dto.dtodto;
+import sparta.orderservice.dto.OrderItemDto;
+import sparta.orderservice.dto.ProductDto;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class OrderController {
 
     // orderId로 상태 조회
     @GetMapping("/items/{orderId}")
-    public List<OrderItemDTO> getOrderItems(@PathVariable("orderId") int orderId) {
+    public List<OrderItemDto> getOrderItems(@PathVariable("orderId") int orderId) {
         return orderService.getOrderItems(orderId);
     }
 
@@ -58,10 +59,17 @@ public class OrderController {
 
     // 주문 하기
     @PostMapping("/place-order")
-    public void placeOrder(HttpServletRequest request,@RequestBody dtodto dtodto ) {
+    public ResponseEntity<ResponseMessage> placeOrder(HttpServletRequest request, @RequestBody ProductDto productDto) {
         int userId = extractUserIdFromRequest(request);
-        System.out.println("111");
-        orderService.placeOrder(userId, dtodto.getProductId(), dtodto.getQuantity());
+        orderService.placeOrder(userId, productDto.getProductId(), productDto.getQuantity());
+
+        ResponseMessage response = ResponseMessage.builder()
+                .data("")
+                .statusCode(200)
+                .resultMessage("Success")
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
 
