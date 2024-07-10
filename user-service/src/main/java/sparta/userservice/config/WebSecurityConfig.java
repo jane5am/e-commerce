@@ -48,7 +48,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+        return new JwtAuthorizationFilter(userDetailsService);
     }
 
     @Bean
@@ -66,6 +66,7 @@ public class WebSecurityConfig {
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용 설정
                         .requestMatchers("/").permitAll() // 메인 페이지 요청 허가
                         .requestMatchers("/api/v1/user/**").permitAll() // '/api/v1/user/'로 시작하는 요청 모두 접근 허가
+                        .requestMatchers("/api/v1/wishList/**").permitAll() // '/api/v1/wishList/'로 시작하는 요청 모두 접근 허가
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN") // '/api/v1/admin/'로 시작하는 요청은 ADMIN 권한 필요
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
