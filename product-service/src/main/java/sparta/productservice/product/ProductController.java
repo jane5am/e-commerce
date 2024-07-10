@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sparta.orderservice.dto.ProductDto;
+import sparta.orderservice.dto.CreateOrderDto;
 import sparta.productservice.domain.Product;
 import sparta.productservice.dto.ResponseMessage;
+import sparta.productservice.dto.product.CreateProductDto;
 import sparta.productservice.dto.product.ProductDto;
 
 import java.util.List;
@@ -53,9 +54,10 @@ public class ProductController {
         return ResponseEntity.ok(productDtos);
     }
 
+    // 제품 생성
     @PostMapping
-    public ResponseEntity<ResponseMessage> createProduct(@RequestBody ProductDto productDto) {
-        Product product = productService.createProduct(productDto);
+    public ResponseEntity<ResponseMessage> createProduct(@RequestBody CreateProductDto createProductDto) {
+        Product product = productService.createProduct(createProductDto);
         ResponseMessage response = ResponseMessage.builder()
                 .data(product)
                 .statusCode(201)
@@ -87,14 +89,14 @@ public class ProductController {
 
     // Order-Service : 재고 업데이트
     @PutMapping("/updateStock")
-    public void updateStock(@RequestBody ProductDto productDto){
-        productService.updateStock(productDto);
+    public void updateStock(@RequestBody CreateOrderDto createOrderDto){
+        productService.updateStock(createOrderDto);
     };
 
     // Order-Service : 재고 되돌리기
     @PutMapping("/restoreStock")
-    public void restoreStock(@RequestBody ProductDto productDto){
-        productService.restoreStock(productDto);
+    public void restoreStock(@RequestBody CreateOrderDto createOrderDto){
+        productService.restoreStock(createOrderDto);
     };
 
     // Order-Service : 가격 가져오기
