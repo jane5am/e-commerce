@@ -59,9 +59,9 @@ public class OrderController {
 
     // 주문 하기
     @PostMapping("/createOrder")
-    public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody CreateOrderDto createOrderDto) {
+    public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody List<CreateOrderDto> orderItems) {
         int userId = extractUserIdFromRequest(request);
-        orderService.createOrder(userId, createOrderDto.getProductId(), createOrderDto.getQuantity());
+        orderService.createOrder(userId, orderItems);
 
         ResponseMessage response = ResponseMessage.builder()
                 .data("")
@@ -72,6 +72,8 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+
+    // 주문 취소
     @GetMapping("/cancelOrder/{orderId}")
     public ResponseEntity<ResponseMessage> cancelOrder(@PathVariable("orderId") int orderId) {
         orderService.cancelOrder(orderId);
@@ -80,6 +82,22 @@ public class OrderController {
                 .data("")
                 .statusCode(200)
                 .resultMessage("Order cancelled successfully")
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 주문 아이템 반품
+    @PostMapping("/returnOrderItem/{orderItemId}")
+    public ResponseEntity<ResponseMessage> returnOrderItem(@PathVariable("orderItemId") int orderItemId) {
+
+        System.out.println("orderItemId : " + orderItemId);
+        orderService.returnOrderItem(orderItemId);
+
+        ResponseMessage response = ResponseMessage.builder()
+                .data("")
+                .statusCode(200)
+                .resultMessage("Order item returned successfully")
                 .build();
 
         return ResponseEntity.ok(response);
