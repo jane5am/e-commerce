@@ -38,9 +38,15 @@ public class ProductController {
     }
 
     // Order-Service : 재고 업데이트
-    @PutMapping("/update-stock")
+    @PutMapping("/updateStock")
     public void updateStock(@RequestBody ProductDto productDto){
         productService.updateStock(productDto);
+    };
+
+    // Order-Service : 재고 되돌리기
+    @PutMapping("/restoreStock")
+    public void restoreStock(@RequestBody ProductDto productDto){
+        productService.restoreStock(productDto);
     };
 
     // Order-Service : 가격 가져오기

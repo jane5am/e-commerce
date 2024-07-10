@@ -26,10 +26,6 @@ public class Shipment extends CommonEntity {
     @Enumerated(EnumType.STRING)
     private ShipmentStatus status;
 
-    @OneToMany(mappedBy = "shipment", fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<OrderItem> orderItems;
-
     public enum ShipmentStatus {
         ORDERED, // 주문완료
         SHIPPED, // 배송중

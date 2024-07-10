@@ -10,8 +10,11 @@ import sparta.orderservice.dto.ProductDto;
 @FeignClient(name = "product-service")
 public interface ProductServiceClient {
 
-    @PutMapping("/api/v1/product/update-stock")
+    @PutMapping("/api/v1/product/updateStock")
     void updateStock(@RequestBody ProductDto productDto);
+
+    @PutMapping("/api/v1/product/restoreStock")
+    void restoreStock(@RequestBody ProductDto productDto);
 
     @GetMapping("/api/v1/product/getPrice")
     int getProductPrice(@RequestParam("productId") int productId);

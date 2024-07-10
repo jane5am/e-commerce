@@ -30,6 +30,18 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    public void restoreStock(ProductDto productDto) {
+        Product product = productRepository.findById(productDto.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        int newStock = product.getQuantity() + productDto.getQuantity();
+        if (newStock < 0) {
+            throw new RuntimeException("Not enough stock available");
+        }
+        product.setQuantity(newStock);
+        product.setUpdatedAt(LocalDateTime.now());
+        productRepository.save(product);
+    }
+
     public int getProductPrice(int productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));

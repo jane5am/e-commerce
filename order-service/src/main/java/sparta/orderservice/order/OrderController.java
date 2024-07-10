@@ -58,10 +58,10 @@ public class OrderController {
 
 
     // 주문 하기
-    @PostMapping("/place-order")
-    public ResponseEntity<ResponseMessage> placeOrder(HttpServletRequest request, @RequestBody ProductDto productDto) {
+    @PostMapping("/createOrder")
+    public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody ProductDto productDto) {
         int userId = extractUserIdFromRequest(request);
-        orderService.placeOrder(userId, productDto.getProductId(), productDto.getQuantity());
+        orderService.createOrder(userId, productDto.getProductId(), productDto.getQuantity());
 
         ResponseMessage response = ResponseMessage.builder()
                 .data("")
@@ -72,7 +72,17 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/cancelOrder/{orderId}")
+    public ResponseEntity<ResponseMessage> cancelOrder(@PathVariable("orderId") int orderId) {
+        orderService.cancelOrder(orderId);
 
-//24시전 && 주문완료인 상태일때
+        ResponseMessage response = ResponseMessage.builder()
+                .data("")
+                .statusCode(200)
+                .resultMessage("Order cancelled successfully")
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 
 }
