@@ -1,5 +1,6 @@
 package sparta.orderservice.order;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import sparta.orderservice.domain.Shipment;
 import sparta.orderservice.dto.OrderItemDto;
 import sparta.orderservice.dto.CreateOrderDto;
 
+import java.beans.Transient;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,14 +39,15 @@ public class OrderService {
 
     @Autowired
     private PaymentRepository paymentRepository;
-    private CreateOrderDto createOrderDto;
 
     // 유저 아이디로 주문 목록 조회
+    @Transactional
     public List<Order> getOrdersByUserId(int userId) {
 
         return orderRepository.findByUserId(userId);
     }
 
+    @Transactional
     public List<OrderItemDto> getOrderItems(int orderId) {
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
         return orderItems.stream().map(orderItem -> {
@@ -61,6 +64,7 @@ public class OrderService {
         }).collect(Collectors.toList());
     }
 
+    @Transactional
     public String getShipmentStatus(int orderItemId) {
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new RuntimeException("OrderItem not found"));
@@ -69,44 +73,67 @@ public class OrderService {
         return shipment.getStatus().name();
     }
 
-
-    public void createOrder(int userId, int productId, int quantity) {
-
+    @Transactional
+    public void createOrder(int userId, List<CreateOrderDto> orderItems) {
         // 주문 생성
         Order order = new Order();
         order.setUserId(userId);
         order.setOrderDate(new Date());
-        order.setTotalAmount(quantity);
-        orderRepository.save(order);
+        order.setTotalPrice(orderItems.stream().mapToInt(CreateOrderDto::getQuantity).sum());
+        try {
+            orderRepository.save(order);
+        } catch (Exception e) {
+            throw e;
+        }
 
-        // 배송 정보 생성
-        Shipment shipment = new Shipment();
-        shipment.setStatus(Shipment.ShipmentStatus.ORDERED);
-        shipmentRepository.save(shipment);
+        // 결제 금액 계산
+        int totalPrice = 0;
 
-        // 주문 항목 생성
-        OrderItem orderItem = new OrderItem();
-        orderItem.setOrderId(order.getId());
-        orderItem.setProductId(productId);
-        orderItem.setShipmentId(shipment.getId());
-        orderItem.setQuantity(quantity);
-        orderItemRepository.save(orderItem);
+        for (CreateOrderDto item : orderItems) {
+            // 배송 정보 생성
+            Shipment shipment = new Shipment();
+            shipment.setStatus(Shipment.ShipmentStatus.ORDERED);
+            try {
+                shipmentRepository.save(shipment);
+            } catch (Exception e) {
+                throw e;
+            }
 
-        // 재고 업데이트
-        CreateOrderDto createOrderDto = new CreateOrderDto(productId, quantity);
-        productServiceClient.updateStock(createOrderDto);
+            // 주문 항목 생성
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrderId(order.getId());
+            orderItem.setProductId(item.getProductId());
+            orderItem.setShipmentId(shipment.getId());
+            orderItem.setQuantity(item.getQuantity());
+            try {
+                orderItemRepository.save(orderItem);
+            } catch (Exception e) {
+                throw e;
+            }
+
+
+            // 재고 업데이트
+            productServiceClient.updateStock(item);
+
+            // 각 상품의 가격을 가져와 총 가격 계산
+            int productPrice = productServiceClient.getProductPrice(item.getProductId());
+            totalPrice += productPrice * item.getQuantity();
+        }
 
         // 결제 정보 생성
-        int productPrice = productServiceClient.getProductPrice(productId);
-
         Payment payment = new Payment();
         payment.setOrderId(order.getId());
         payment.setPaymentDate(new Date());
-        payment.setPrice(quantity * productPrice); // 상품 가격 * 수량
+        payment.setPrice(totalPrice); // 총 가격
         payment.setPaymentMethod("card");
-        paymentRepository.save(payment);
+        try {
+            paymentRepository.save(payment);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
+    @Transactional
     public void cancelOrder(int orderId) {
         // 주문 조회
         Order order = orderRepository.findById(orderId)
@@ -144,6 +171,51 @@ public class OrderService {
             CreateOrderDto createOrderDto = new CreateOrderDto(orderItem.getProductId(), orderItem.getQuantity());
             productServiceClient.restoreStock(createOrderDto);
         }
+    }
+
+    // 반품하기
+    @Transactional
+    public void returnOrderItem(int orderItemId) {
+        // 주문 항목 조회
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new RuntimeException("OrderItem not found"));
+
+        // 배송 정보 조회
+        Shipment shipment = shipmentRepository.findById(orderItem.getShipmentId())
+                .orElseThrow(() -> new RuntimeException("Shipment not found"));
+
+        // 반품 가능 여부 확인 (배송 완료 후 D+1일까지만 가능)
+        LocalDateTime deliveredTime = Instant.ofEpochMilli(orderItem.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+        LocalDateTime now = LocalDateTime.now();
+        long daysSinceDelivered = ChronoUnit.DAYS.between(deliveredTime, now);
+
+        if (shipment.getStatus() != Shipment.ShipmentStatus.DELIVERED || daysSinceDelivered > 1) {
+            throw new RuntimeException("Cannot return order item that is not delivered or delivered more than a day ago");
+        }
+
+        // 배송 상태를 반품완료로 변경
+        shipment.setStatus(Shipment.ShipmentStatus.RETURNED);
+
+        try {
+            shipmentRepository.save(shipment);
+        } catch (Exception e) {
+//            logger.error("Error saving dailyVideoViews for videoId: " + shipment, e);
+            throw e;
+
+        }
+
+        // 재고 원복
+        CreateOrderDto createOrderDto = new CreateOrderDto(orderItem.getProductId(), orderItem.getQuantity());
+        productServiceClient.restoreStock(createOrderDto);
+
+        // 결제 정보 업데이트
+        Payment payment = paymentRepository.findByOrderId(orderItem.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        payment.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        payment.setDltYsno("Y");
+        paymentRepository.save(payment);
     }
 
 }
