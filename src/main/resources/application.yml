@@ -10,6 +10,9 @@ spring:
     exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 
 eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 5  # 상태 갱신 간격 (기본 30초)
+    lease-expiration-duration-in-seconds: 5  # 만료 시간 (기본 90초)
   client:
     register-with-eureka: false
     fetch-registry: false

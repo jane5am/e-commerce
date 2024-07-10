@@ -17,9 +17,10 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:create}
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
       naming:
         physical-strategy: sparta.orderservice.config.CustomPhysicalNamingStrategy
+
     properties:
       hibernate:
         dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.MySQLDialect}

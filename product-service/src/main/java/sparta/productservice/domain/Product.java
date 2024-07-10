@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "`product`")
@@ -22,9 +23,6 @@ public class Product extends CommonEntity {
     @Column(name = "id", nullable = false, unique = true)
     private int productId;
 
-    @Column(name = "sellerId", nullable = false)
-    private int sellerId;
-
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -32,9 +30,18 @@ public class Product extends CommonEntity {
     private int price;
 
     @Column(nullable = false)
+    private int quantity;
+
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)
-    private String status; // 상태, 주문가능 여부
+    private String exposeYsno; // 상태, 주문가능 여부
+
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        this.exposeYsno = "Y";
+    }
 
 }

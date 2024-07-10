@@ -6,9 +6,14 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sparta.userservice.domain.User;
+import sparta.userservice.domain.WishList;
 import sparta.userservice.dto.user.CreateUserRequestDto;
 import sparta.userservice.dto.user.PutUserRequestDto;
+import sparta.userservice.dto.user.SendEmailRequestDto;
 import sparta.userservice.dto.user.UserCommonDto;
+import sparta.userservice.provider.email.EmailProvider;
+import sparta.userservice.wishlist.WishListRepository;
+import sparta.userservice.utils.GenerateCertificationNumberUtil;
 import sparta.userservice.utils.JwtUtil;
 
 import java.util.List;
@@ -22,6 +27,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final EmailProvider emailProvider;
 
     //회원가입
     public User createUser(CreateUserRequestDto createUserRequestDto) throws BadRequestException {
@@ -80,6 +86,9 @@ public class UserService {
     }
 
 
+    // 이메일 인증
+
+
     // 전체 유저 조회
     public List<User> getAllUsers() {
 
@@ -125,4 +134,41 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
+    public void emailCertification(SendEmailRequestDto sendEmailRequestDto) throws BadRequestException {
+
+        try {
+
+            int userId = sendEmailRequestDto.getUserId();
+            String email = sendEmailRequestDto.getEmail();
+
+            Optional<User> existedUser = userRepository.findByEmail(email);
+            if(existedUser.isPresent()) {
+                throw new BadRequestException("이미 가입된 이메일 입니다.");
+            }
+
+            String certificationNumber = GenerateCertificationNumberUtil.getCertificationNumber();
+            boolean isSuccessed = emailProvider.sendCertificationMail(email, certificationNumber);
+            if( !isSuccessed ){
+                throw new BadRequestException("이메일 인증 메일 전송에 실패했습니다.");
+            }
+
+
+        }catch ( Exception e ) {
+            e.printStackTrace();
+            throw new BadRequestException("이메일 인증 메일 전송에 실패했습니다.");
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

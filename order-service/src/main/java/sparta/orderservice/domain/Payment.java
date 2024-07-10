@@ -23,12 +23,12 @@ public class Payment extends CommonEntity {
     @Column(name = "orderId", nullable = false)
     private int orderId;
 
-    @Column(name = "date", nullable = false)
-    private Date date;
+    @Column(name = "paymentDate", nullable = false)
+    private Date paymentDate;
 
     @Column(name = "price", nullable = false)
     private int price;
 
-    @Column(name = "method", nullable = false)
-    private String method;
+    @Column(name = "paymentMethod", nullable = false)
+    private String paymentMethod;
 }

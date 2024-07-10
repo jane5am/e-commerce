@@ -1,10 +1,13 @@
 package sparta.orderservice.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Table(name = "`shipment`")
@@ -20,5 +23,14 @@ public class Shipment extends CommonEntity {
     private int id;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ShipmentStatus status;
+
+    public enum ShipmentStatus {
+        ORDERED, // 주문완료
+        SHIPPED, // 배송중
+        DELIVERED, // 배송완료
+        CANCELLED, // 취소완료
+        RETURNED // 반품중
+    }
 }

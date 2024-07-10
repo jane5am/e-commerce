@@ -24,6 +24,18 @@ spring:
         show_sql: true
         format_sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${ MAIL_USERNAME }
+    password: ${ MAIL_PASSWORD }
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 eureka:
   client:
     register-with-eureka: true
@@ -42,4 +54,5 @@ eureka:
 
 jwt:
   secret:
-    key: ${JWT_SECRET_KEY:7Leo7JeF7L2U7Iqk7ZmU7J207YyF7ZW064u56rWQ7Jyh6rO87KCV7J2E64Gd64K06rOg64KY66m06ryt7Leo7JeF7ZWY7Iuk7IiY7J6I7J2E6rKB64uI64ukLg==}
+    key: ${JWT_SECRET_KEY}
+
