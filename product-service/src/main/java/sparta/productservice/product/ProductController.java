@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sparta.orderservice.dto.ProductDto;
 import sparta.productservice.domain.Product;
 import sparta.productservice.dto.ResponseMessage;
 import sparta.productservice.dto.product.ProductDto;
@@ -83,4 +84,23 @@ public class ProductController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    // Order-Service : 재고 업데이트
+    @PutMapping("/updateStock")
+    public void updateStock(@RequestBody ProductDto productDto){
+        productService.updateStock(productDto);
+    };
+
+    // Order-Service : 재고 되돌리기
+    @PutMapping("/restoreStock")
+    public void restoreStock(@RequestBody ProductDto productDto){
+        productService.restoreStock(productDto);
+    };
+
+    // Order-Service : 가격 가져오기
+    @GetMapping("/getPrice")
+    public int getProductPrice(@RequestParam("productId") int productId){
+        return productService.getProductPrice(productId);
+    }
+
 }
