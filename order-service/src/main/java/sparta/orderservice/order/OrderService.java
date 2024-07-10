@@ -9,7 +9,7 @@ import sparta.orderservice.domain.OrderItem;
 import sparta.orderservice.domain.Payment;
 import sparta.orderservice.domain.Shipment;
 import sparta.orderservice.dto.OrderItemDto;
-import sparta.orderservice.dto.ProductDto;
+import sparta.orderservice.dto.CreateOrderDto;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -37,7 +37,7 @@ public class OrderService {
 
     @Autowired
     private PaymentRepository paymentRepository;
-    private ProductDto productDto;
+    private CreateOrderDto createOrderDto;
 
     // 유저 아이디로 주문 목록 조회
     public List<Order> getOrdersByUserId(int userId) {
@@ -93,8 +93,8 @@ public class OrderService {
         orderItemRepository.save(orderItem);
 
         // 재고 업데이트
-        ProductDto productDto = new ProductDto(productId, quantity);
-        productServiceClient.updateStock(productDto);
+        CreateOrderDto createOrderDto = new CreateOrderDto(productId, quantity);
+        productServiceClient.updateStock(createOrderDto);
 
         // 결제 정보 생성
         int productPrice = productServiceClient.getProductPrice(productId);
@@ -141,8 +141,8 @@ public class OrderService {
             shipmentRepository.save(shipment);
 
             // 재고 복구
-            ProductDto productDto = new ProductDto(orderItem.getProductId(), orderItem.getQuantity());
-            productServiceClient.restoreStock(productDto);
+            CreateOrderDto createOrderDto = new CreateOrderDto(orderItem.getProductId(), orderItem.getQuantity());
+            productServiceClient.restoreStock(createOrderDto);
         }
     }
 

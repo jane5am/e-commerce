@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import sparta.orderservice.ResponseMessage;
 import sparta.orderservice.domain.Order;
 import sparta.orderservice.dto.OrderItemDto;
-import sparta.orderservice.dto.ProductDto;
+import sparta.orderservice.dto.CreateOrderDto;
 
 import java.util.List;
 
@@ -59,9 +59,9 @@ public class OrderController {
 
     // 주문 하기
     @PostMapping("/createOrder")
-    public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody ProductDto productDto) {
+    public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody CreateOrderDto createOrderDto) {
         int userId = extractUserIdFromRequest(request);
-        orderService.createOrder(userId, productDto.getProductId(), productDto.getQuantity());
+        orderService.createOrder(userId, createOrderDto.getProductId(), createOrderDto.getQuantity());
 
         ResponseMessage response = ResponseMessage.builder()
                 .data("")
