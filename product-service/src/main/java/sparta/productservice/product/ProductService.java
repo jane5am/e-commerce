@@ -6,6 +6,7 @@ import sparta.productservice.domain.Product;
 import sparta.productservice.dto.product.CreateProductDto;
 import sparta.productservice.dto.product.ProductDto;
 import sparta.orderservice.dto.CreateOrderDto;
+import sparta.productservice.dto.product.PutProductDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -63,12 +64,12 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public Product updateProduct(int id, ProductDto productDto) {
+    public Product updateProduct(int id, PutProductDto putProductDto) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setName(productDto.getName());
-        product.setPrice(productDto.getPrice());
-        product.setDescription(productDto.getDescription());
-        product.setExposeYsno(productDto.getExposeYsno());
+        product.setName(putProductDto.getName());
+        product.setPrice(putProductDto.getPrice());
+        product.setDescription(putProductDto.getDescription());
+        product.setExposeYsno(putProductDto.getExposeYsno());
         return productRepository.save(product);
     }
 
