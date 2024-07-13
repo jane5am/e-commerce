@@ -29,10 +29,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         // 로그인 경로에 대한 예외 처리
         String loginPath = "/api/v1/user/login";
-        if (req.getRequestURI().equals(loginPath)) {
+        String sendCertificationPath = "/api/v1/user/send-certification";
+        String checkCertificationPath = "/api/v1/user/email-certification";
+
+        String requestURI = req.getRequestURI();
+
+        if (requestURI.equals(loginPath) || requestURI.equals(sendCertificationPath) || requestURI.equals(checkCertificationPath)) {
             filterChain.doFilter(req, res);
             return;
         }
+
 
         // 헤더에서 userId와 role을 추출
         String userIdStr = req.getHeader("x-claim-userid");

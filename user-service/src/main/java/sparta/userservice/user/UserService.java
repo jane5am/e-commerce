@@ -3,14 +3,12 @@ package sparta.userservice.user;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sparta.userservice.domain.User;
 import sparta.userservice.domain.WishList;
-import sparta.userservice.dto.user.CreateUserRequestDto;
-import sparta.userservice.dto.user.PutUserRequestDto;
-import sparta.userservice.dto.user.SendEmailRequestDto;
-import sparta.userservice.dto.user.UserCommonDto;
+import sparta.userservice.dto.user.*;
 import sparta.userservice.provider.email.EmailProvider;
 import sparta.userservice.wishlist.WishListRepository;
 import sparta.userservice.utils.GenerateCertificationNumberUtil;
@@ -28,6 +26,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final EmailProvider emailProvider;
+    private final RedisService redisService;
 
     //회원가입
     public User createUser(CreateUserRequestDto createUserRequestDto) throws BadRequestException {
@@ -138,7 +137,6 @@ public class UserService {
 
         try {
 
-            int userId = sendEmailRequestDto.getUserId();
             String email = sendEmailRequestDto.getEmail();
 
             Optional<User> existedUser = userRepository.findByEmail(email);
@@ -158,6 +156,31 @@ public class UserService {
             throw new BadRequestException("이메일 인증 메일 전송에 실패했습니다.");
         }
     }
+
+    public void checkCertification(EmailCheckRequestDto emailCheckRequestDto) throws BadRequestException {
+
+        try {
+            int userId = emailCheckRequestDto.getUserId();
+            String email = emailCheckRequestDto.getEmail();
+            String certificationNumber = emailCheckRequestDto.getCertificationNumber();
+
+            // Redis에서 인증 코드 확인
+            String key = "cert:" + email;
+            String storedCertificationNumber = (String) redisService.getData(key);
+
+            if (storedCertificationNumber == null || !storedCertificationNumber.equals(certificationNumber)) {
+                throw new BadRequestException("인증 번호가 일치하지 않거나 만료되었습니다.");
+            }
+
+            // 인증이 완료되면 Redis에서 인증 코드를 삭제
+            redisService.deleteData(key);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BadRequestException("데이터 베이스 에러입니다.");
+        }
+    }
+
 }
 
 
