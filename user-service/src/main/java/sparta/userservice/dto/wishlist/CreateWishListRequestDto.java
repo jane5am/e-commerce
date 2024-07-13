@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateWishListRequestDto {
-    private String productId;
+    private int productId;
     private int quantity;
 }
