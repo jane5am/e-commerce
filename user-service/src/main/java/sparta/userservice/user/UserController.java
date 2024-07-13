@@ -148,8 +148,8 @@ public class UserController {
     }
 
     // 회원 수정
-    @PutMapping()
-    public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserRequestDto putUserRequestDto) {
+    @PutMapping("/update-user")
+    public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserRequestDto putUserRequestDto) throws BadRequestException {
         User updatedUser = userService.updateUser(putUserRequestDto); // exception은 서비스에서 내주기
 
         ResponseMessage response = ResponseMessage.builder()

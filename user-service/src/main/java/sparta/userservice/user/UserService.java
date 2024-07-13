@@ -84,10 +84,6 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-
-    // 이메일 인증
-
-
     // 전체 유저 조회
     public List<User> getAllUsers() {
 
@@ -107,17 +103,24 @@ public class UserService {
     }
 
 
-    // 회원 수정
-    public User updateUser(PutUserRequestDto putUserRequestDto) {
-
+    // 회원 비밀번호 수정
+    public User updateUser(PutUserRequestDto putUserRequestDto) throws BadRequestException {
         Optional<User> optionalUser = userRepository.findById(putUserRequestDto.getUserId());
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            user.setEmail(putUserRequestDto.getEmail());
+
+            if (putUserRequestDto.getPassword() != null && !putUserRequestDto.getPassword().isEmpty()) {
+                // 비밀번호 검증
+                String password = putUserRequestDto.getPassword();
+                if (!isPasswordValid(password)) {
+                    throw new BadRequestException("Password does not meet the security requirements");
+                }
+
+                user.setPassword(passwordEncoder.encode(putUserRequestDto.getPassword()));  // 비밀번호 암호화
+            }
 
             return userRepository.save(user);
-
         } else {
             throw new RuntimeException("User not found with id " + putUserRequestDto.getUserId());
         }
@@ -133,29 +136,6 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public void emailCertification(SendEmailRequestDto sendEmailRequestDto) throws BadRequestException {
-
-        try {
-
-            String email = sendEmailRequestDto.getEmail();
-
-            Optional<User> existedUser = userRepository.findByEmail(email);
-            if(existedUser.isPresent()) {
-                throw new BadRequestException("이미 가입된 이메일 입니다.");
-            }
-
-            String certificationNumber = GenerateCertificationNumberUtil.getCertificationNumber();
-            boolean isSuccessed = emailProvider.sendCertificationMail(email, certificationNumber);
-            if( !isSuccessed ){
-                throw new BadRequestException("이메일 인증 메일 전송에 실패했습니다.");
-            }
-
-
-        }catch ( Exception e ) {
-            e.printStackTrace();
-            throw new BadRequestException("이메일 인증 메일 전송에 실패했습니다.");
-        }
-    }
 
     public void checkCertification(EmailCheckRequestDto emailCheckRequestDto) throws BadRequestException {
 

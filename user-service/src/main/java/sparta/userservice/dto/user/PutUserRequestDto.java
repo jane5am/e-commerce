@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 public class PutUserRequestDto {
     private int userId;
-    private String email;
+    private String password;  // 비밀번호 필드 추가
 }
