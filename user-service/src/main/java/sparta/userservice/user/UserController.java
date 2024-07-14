@@ -1,6 +1,7 @@
 package sparta.userservice.user;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import sparta.userservice.client.ProductServiceClient;
 import sparta.userservice.client.OrderServiceClient;
 import sparta.userservice.domain.User;
-import sparta.userservice.domain.WishList;
 import sparta.userservice.dto.ResponseMessage;
 import sparta.userservice.dto.order.OrderDto;
 import sparta.userservice.dto.user.*;
@@ -145,10 +145,25 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // 회원 수정
+    // 회원 비밀번호 수정
+    @PutMapping("/update-password")
+    public ResponseEntity<ResponseMessage> updatePassword(@RequestBody PutPasswordRequestDto putPasswordRequestDto, HttpServletRequest request) throws BadRequestException {
+        int userId = extractUserIdFromRequest(request);
+        User updatedUser = userService.updatePassword(userId,putPasswordRequestDto); // exception은 서비스에서 내주기
+
+        ResponseMessage response = ResponseMessage.builder()
+                .data(updatedUser)
+                .statusCode(200)
+                .resultMessage("User updated successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    // 회원 정보 수정
     @PutMapping("/update-user")
-    public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserRequestDto putUserRequestDto) throws BadRequestException {
-        User updatedUser = userService.updateUser(putUserRequestDto); // exception은 서비스에서 내주기
+    public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserdRequestDto putUserdRequestDto, HttpServletRequest request) throws BadRequestException {
+        int userId = extractUserIdFromRequest(request);
+        User updatedUser = userService.updateUser(userId, putUserdRequestDto); // exception은 서비스에서 내주기
 
         ResponseMessage response = ResponseMessage.builder()
                 .data(updatedUser)
@@ -220,6 +235,23 @@ public class UserController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+
+    private int extractUserIdFromRequest(HttpServletRequest request) {
+        String userIdHeader = request.getHeader("x-claim-userid");
+        if (userIdHeader == null) {
+            throw new RuntimeException("Missing user ID in headers");
+        }
+
+        int userId;
+        try {
+            userId = Integer.parseInt(userIdHeader);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid user ID format in headers");
+        }
+
+        return userId;
     }
 
 }

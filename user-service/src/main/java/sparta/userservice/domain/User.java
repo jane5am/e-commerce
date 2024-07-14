@@ -29,6 +29,12 @@ public class User {
     private String password;
 
     @Column(nullable = false)
+    private String phone;
+
+    @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false)
     private String type;// 카카오인지 네이버인지
 
     @Enumerated(EnumType.STRING)
