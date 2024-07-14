@@ -43,7 +43,7 @@ public class ProductController {
      * @return 상품 정보 목록
      */
     @GetMapping
-    public ResponseEntity<List<ProductDto>> getProductsByIds(@RequestParam("ids") List<Integer> productIds) {
+    public List<ProductDto> getProductsByIds(@RequestParam("ids") List<Integer> productIds) {
         // ProductService를 통해 상품 정보 조회
         List<Product> products = productService.getProductsByIds(productIds);
         // Product 엔티티를 ProductDto(마이크로 서비스 간 사용하는 DTO)로 변환
@@ -51,7 +51,7 @@ public class ProductController {
                 .map(product -> new ProductDto(product.getProductId(), product.getName(), product.getPrice(), product.getDescription(), product.getExposeYsno()))
                 .collect(Collectors.toList());
         // userservice에 응답
-        return ResponseEntity.ok(productDtos);
+        return productDtos;
     }
 
     // 제품 생성

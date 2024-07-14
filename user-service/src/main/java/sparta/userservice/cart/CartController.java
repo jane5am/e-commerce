@@ -12,7 +12,6 @@ import sparta.userservice.dto.product.ProductDto;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/cart")
@@ -64,17 +63,13 @@ public class CartController {
         int userId = Integer.parseInt(userIdStr);
 
         // 사용자별 WishList 조회
-        List<Cart> cart = cartService.getUserCart(userId);
-        // WishList에서 상품 ID 목록 추출
-        List<Integer> productIds = cart.stream().map(Cart::getProductId).collect(Collectors.toList());
-        // ProductServiceClient를 통해 상품 정보 조회
-        List<ProductDto> products = productServiceClient.getProductsByIds(productIds);
+        List<ProductDto> products = cartService.getUserCart(userId);
 
         // 응답 메시지 구성
         ResponseMessage response = ResponseMessage.builder()
                 .data(products)
                 .statusCode(200)
-                .resultMessage("WishList retrieved successfully")
+                .resultMessage("cart retrieved successfully")
                 .build();
 
         return ResponseEntity.ok(response);

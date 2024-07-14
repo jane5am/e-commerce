@@ -1,6 +1,5 @@
 package sparta.userservice.wishlist;
 
-import jakarta.ws.rs.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import sparta.userservice.domain.WishList;

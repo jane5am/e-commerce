@@ -13,7 +13,6 @@ import sparta.userservice.client.OrderServiceClient;
 import sparta.userservice.domain.User;
 import sparta.userservice.domain.WishList;
 import sparta.userservice.dto.ResponseMessage;
-import sparta.userservice.dto.product.ProductDto;
 import sparta.userservice.dto.order.OrderDto;
 import sparta.userservice.dto.user.*;
 import sparta.userservice.provider.jwt.JwtBlacklist;
@@ -22,7 +21,6 @@ import sparta.userservice.security.UserDetailsImpl;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/user")
