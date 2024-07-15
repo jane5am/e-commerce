@@ -29,9 +29,6 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private String emailVerified;
-
-    @Column(nullable = false)
     private String type;// 카카오인지 네이버인지
 
     @Enumerated(EnumType.STRING)
@@ -41,7 +38,6 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.role = Role.USER;
-        this.emailVerified = "N";
     }
 
     public enum Role {

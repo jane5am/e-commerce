@@ -15,10 +15,7 @@ import sparta.userservice.domain.WishList;
 import sparta.userservice.dto.ResponseMessage;
 import sparta.userservice.dto.product.ProductDto;
 import sparta.userservice.dto.order.OrderDto;
-import sparta.userservice.dto.user.CreateUserRequestDto;
-import sparta.userservice.dto.user.PutUserRequestDto;
-import sparta.userservice.dto.user.SendEmailRequestDto;
-import sparta.userservice.dto.user.UserCommonDto;
+import sparta.userservice.dto.user.*;
 import sparta.userservice.provider.jwt.JwtBlacklist;
 import sparta.userservice.security.UserDetailsImpl;
 
@@ -36,6 +33,7 @@ public class UserController {
     private final JwtBlacklist jwtBlacklist;
     private final ProductServiceClient productServiceClient;
     private final OrderServiceClient orderServiceClient;
+    private final EmailService emailService;
     private Environment env;
 
     @GetMapping("/health-check")
@@ -82,19 +80,44 @@ public class UserController {
         return ResponseEntity.ok(responseMessage);
     }
 
-    // 이메일 인증
-    @PostMapping("/email-certification")
-    public ResponseEntity<ResponseMessage> emailCertification(@RequestBody SendEmailRequestDto sendEmailRequestDto) throws BadRequestException {
-        userService.emailCertification(sendEmailRequestDto);
+    // 인증 이메일 전송
+    @PostMapping("/send-certification")
+    public ResponseEntity<ResponseMessage> sendCertificationEmail(@RequestBody SendEmailRequestDto sendEmailRequestDto) {
+        emailService.sendCertificationEmail(sendEmailRequestDto);
 
-        ResponseMessage responseMessage = ResponseMessage.builder()
-                .data("이메일 인증 성공입니다!")
+        ResponseMessage response = ResponseMessage.builder()
+                .data("")
                 .statusCode(200)
-                .resultMessage("email-certification successful")
+                .resultMessage("Email sent successfully")
                 .build();
 
-        return ResponseEntity.ok(responseMessage);
+        return ResponseEntity.ok(response);
     }
+
+    // 이메일 인증
+    @PostMapping("/email-certification")
+    public ResponseEntity<ResponseMessage> emailCertification(@RequestBody EmailCheckRequestDto emailCheckRequestDto) throws BadRequestException {
+        try {
+            userService.checkCertification(emailCheckRequestDto);
+
+            ResponseMessage response = ResponseMessage.builder()
+                    .data("")
+                    .statusCode(200)
+                    .resultMessage("Certification successful")
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException e) {
+            ResponseMessage response = ResponseMessage.builder()
+                    .data("")
+                    .statusCode(400)
+                    .resultMessage(e.getMessage())
+                    .build();
+
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
 
     // 유저 전체 조회
     @GetMapping
@@ -125,8 +148,8 @@ public class UserController {
     }
 
     // 회원 수정
-    @PutMapping()
-    public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserRequestDto putUserRequestDto) {
+    @PutMapping("/update-user")
+    public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserRequestDto putUserRequestDto) throws BadRequestException {
         User updatedUser = userService.updateUser(putUserRequestDto); // exception은 서비스에서 내주기
 
         ResponseMessage response = ResponseMessage.builder()
@@ -200,4 +223,5 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
 }
