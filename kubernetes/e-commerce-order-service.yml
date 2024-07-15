@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: e-commerce-order-service
+spec:
+  selector:
+    app: e-commerce-order-service
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e-commerce-order-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: e-commerce-order-service
+  template:
+    metadata:
+      labels:
+        app: e-commerce-order-service
+    spec:
+      containers:
+        - name: e-commerce-order-service
+          image: hyejan/order-service:latest
+          ports:
+            - containerPort: 8082
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 70m
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
