@@ -28,8 +28,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
 
         // 로그인 경로에 대한 예외 처리
+        String signupPath = "/api/v1/user/signup";
         String loginPath = "/api/v1/user/login";
-        if (req.getRequestURI().equals(loginPath)) {
+        if (req.getRequestURI().equals(loginPath) || req.getRequestURI().equals(signupPath)) {
             filterChain.doFilter(req, res);
             return;
         }
