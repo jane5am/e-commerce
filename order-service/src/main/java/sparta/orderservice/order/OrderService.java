@@ -78,6 +78,7 @@ public class OrderService {
         // 주문 생성
         Order order = new Order();
         order.setUserId(userId);
+        order.setTotalPrice(0000);
         order.setOrderDate(new Date());
         order.setTotalPrice(orderItems.stream().mapToInt(CreateOrderDto::getQuantity).sum());
         try {

@@ -1,4 +1,4 @@
-package sparta.userservice.dto.product;
+package sparta.userservice.dto.cart;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,11 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDto {
+public class CreateCartRequestDto {
     private int productId;
-    private String name;
-    private int price;
-    private String description;
-    private String exposeYsno;
     private int quantity;
 }

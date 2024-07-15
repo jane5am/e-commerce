@@ -3,15 +3,11 @@ package sparta.userservice.user;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sparta.userservice.domain.User;
-import sparta.userservice.domain.WishList;
 import sparta.userservice.dto.user.*;
 import sparta.userservice.provider.email.EmailProvider;
-import sparta.userservice.wishlist.WishListRepository;
-import sparta.userservice.utils.GenerateCertificationNumberUtil;
 import sparta.userservice.utils.JwtUtil;
 
 import java.util.List;
@@ -45,6 +41,8 @@ public class UserService {
         User user = new User();
         user.setEmail(createUserRequestDto.getEmail());
         user.setName(createUserRequestDto.getName());  // username 설정
+        user.setAddress(createUserRequestDto.getAddress());
+        user.setPhone(createUserRequestDto.getPhone());
         user.setType("web");
         user.setPassword(passwordEncoder.encode(createUserRequestDto.getPassword())); // 비밀번호 암호화
 
@@ -104,25 +102,42 @@ public class UserService {
 
 
     // 회원 비밀번호 수정
-    public User updateUser(PutUserRequestDto putUserRequestDto) throws BadRequestException {
-        Optional<User> optionalUser = userRepository.findById(putUserRequestDto.getUserId());
+    public User updatePassword(int userId, PutPasswordRequestDto putPasswordRequestDto) throws BadRequestException {
+        Optional<User> optionalUser = userRepository.findById(userId);
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 
-            if (putUserRequestDto.getPassword() != null && !putUserRequestDto.getPassword().isEmpty()) {
+            if (putPasswordRequestDto.getPassword() != null && !putPasswordRequestDto.getPassword().isEmpty()) {
                 // 비밀번호 검증
-                String password = putUserRequestDto.getPassword();
+                String password = putPasswordRequestDto.getPassword();
                 if (!isPasswordValid(password)) {
                     throw new BadRequestException("Password does not meet the security requirements");
                 }
 
-                user.setPassword(passwordEncoder.encode(putUserRequestDto.getPassword()));  // 비밀번호 암호화
+                user.setPassword(passwordEncoder.encode(putPasswordRequestDto.getPassword()));  // 비밀번호 암호화
             }
 
             return userRepository.save(user);
         } else {
-            throw new RuntimeException("User not found with id " + putUserRequestDto.getUserId());
+            throw new RuntimeException("User not found with id " + userId);
+        }
+    }
+
+    // 회원 정보 수정
+    public User updateUser(int userId, PutUserdRequestDto putUserdRequestDto) throws BadRequestException {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            // 이부분: 회원 정보 업데이트
+            user.setPhone(putUserdRequestDto.getPhone());
+            user.setAddress(putUserdRequestDto.getAddress());
+
+            return userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found with id " + userId);
         }
     }
 

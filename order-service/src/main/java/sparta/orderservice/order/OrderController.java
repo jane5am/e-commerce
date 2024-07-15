@@ -64,7 +64,7 @@ public class OrderController {
         orderService.createOrder(userId, orderItems);
 
         ResponseMessage response = ResponseMessage.builder()
-                .data("")
+                .data(orderItems)
                 .statusCode(200)
                 .resultMessage("Success")
                 .build();
@@ -79,7 +79,7 @@ public class OrderController {
         orderService.cancelOrder(orderId);
 
         ResponseMessage response = ResponseMessage.builder()
-                .data("")
+                .data(orderId)
                 .statusCode(200)
                 .resultMessage("Order cancelled successfully")
                 .build();

@@ -26,7 +26,7 @@ public class ProductController {
         return String.format("It's Working in Product Service in PORT %s", env.getProperty("local.server.port"));
     }
 
-    
+  // 모든 상품 조회
     @GetMapping("/products")
     public ResponseEntity<ResponseMessage> getAllProducts() {
         List<Product> products = productService.getAllProducts();
@@ -38,6 +38,23 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 특정 상품 ID 목록으로 상품 정보 조회
+     *
+     * @param productIds 상품 ID 목록
+     * @return 상품 정보 목록
+     */
+    @GetMapping
+    public List<ProductDto> getProductsByIds(@RequestParam("ids") List<Integer> productIds) {
+        // ProductService를 통해 상품 정보 조회
+        List<Product> products = productService.getProductsByIds(productIds);
+        // Product 엔티티를 ProductDto(마이크로 서비스 간 사용하는 DTO)로 변환
+        List<ProductDto> productDtos = products.stream()
+                .map(product -> new ProductDto(product.getProductId(), product.getName(), product.getPrice(), product.getDescription(), product.getExposeYsno()))
+                .collect(Collectors.toList());
+        // userservice에 응답
+        return productDtos;
+    }
 
     // 제품 생성
     @PostMapping
