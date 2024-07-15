@@ -27,13 +27,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         // 로그인 경로에 대한 예외 처리
+        String signupPath = "/api/v1/user/signup";
         String loginPath = "/api/v1/user/login";
         String sendCertificationPath = "/api/v1/user/send-certification";
         String checkCertificationPath = "/api/v1/user/email-certification";
 
         String requestURI = req.getRequestURI();
 
-        if (requestURI.equals(loginPath) || requestURI.equals(sendCertificationPath) || requestURI.equals(checkCertificationPath)) {
+        if (requestURI.equals(loginPath) || requestURI.equals(sendCertificationPath) || requestURI.equals(checkCertificationPath) || requestURI.equals(signupPath)) {
             filterChain.doFilter(req, res);
             return;
         }
