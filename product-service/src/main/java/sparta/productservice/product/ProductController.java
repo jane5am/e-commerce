@@ -25,6 +25,7 @@ public class ProductController {
         return String.format("It's Working in Product Service in PORT %s", env.getProperty("local.server.port"));
     }
 
+    // 모든 상품 조회
     @GetMapping("/products")
     public ResponseEntity<ResponseMessage> getAllProducts() {
         List<Product> products = productService.getAllProducts();
