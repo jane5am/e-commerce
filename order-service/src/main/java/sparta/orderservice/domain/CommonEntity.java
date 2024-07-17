@@ -19,7 +19,7 @@ import java.util.Date;
 @MappedSuperclass
 public class CommonEntity {
 
-    @Column(name = "createdAt", nullable = false)
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updatedAt", nullable = false)

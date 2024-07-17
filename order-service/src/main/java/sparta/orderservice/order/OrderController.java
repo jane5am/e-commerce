@@ -2,6 +2,7 @@ package sparta.orderservice.order;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import sparta.orderservice.ResponseMessage;
 import sparta.orderservice.domain.Order;
 import sparta.orderservice.dto.OrderItemDto;
 import sparta.orderservice.dto.CreateOrderDto;
+import sparta.orderservice.message.OrderMessage;
 
 import java.util.List;
 
@@ -20,6 +22,8 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     // userId로 주문목록 조회
     @GetMapping("/getOrderList")
@@ -58,10 +62,27 @@ public class OrderController {
 
 
     // 주문 하기
+//    @PostMapping("/createOrder")
+//    public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody List<CreateOrderDto> orderItems) {
+//        int userId = extractUserIdFromRequest(request);
+//        orderService.createOrder(userId, orderItems);
+//
+//        ResponseMessage response = ResponseMessage.builder()
+//                .data(orderItems)
+//                .statusCode(200)
+//                .resultMessage("Success")
+//                .build();
+//
+//        return ResponseEntity.ok(response);
+//    }
+
     @PostMapping("/createOrder")
     public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody List<CreateOrderDto> orderItems) {
         int userId = extractUserIdFromRequest(request);
-        orderService.createOrder(userId, orderItems);
+
+        // 주문 요청을 RabbitMQ 큐에 추가
+        OrderMessage orderMessage = new OrderMessage(userId, orderItems);
+        rabbitTemplate.convertAndSend("order-queue", orderMessage);
 
         ResponseMessage response = ResponseMessage.builder()
                 .data(orderItems)
@@ -71,6 +92,7 @@ public class OrderController {
 
         return ResponseEntity.ok(response);
     }
+
 
 
     // 주문 취소

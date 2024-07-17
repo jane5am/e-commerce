@@ -73,18 +73,19 @@ public class OrderService {
         return shipment.getStatus().name();
     }
 
+
     @Transactional
     public void createOrder(int userId, List<CreateOrderDto> orderItems) {
         // 주문 생성
         Order order = new Order();
         order.setUserId(userId);
-        order.setTotalPrice(0000);
         order.setOrderDate(new Date());
-        order.setTotalPrice(orderItems.stream().mapToInt(CreateOrderDto::getQuantity).sum());
+        order.setTotalPrice(0);  // 초기값 설정
+
         try {
             orderRepository.save(order);
         } catch (Exception e) {
-            throw e;
+            throw new RuntimeException("Order creation failed", e);
         }
 
         // 결제 금액 계산
@@ -97,7 +98,7 @@ public class OrderService {
             try {
                 shipmentRepository.save(shipment);
             } catch (Exception e) {
-                throw e;
+                throw new RuntimeException("Shipment creation failed", e);
             }
 
             // 주문 항목 생성
@@ -109,9 +110,8 @@ public class OrderService {
             try {
                 orderItemRepository.save(orderItem);
             } catch (Exception e) {
-                throw e;
+                throw new RuntimeException("OrderItem creation failed", e);
             }
-
 
             // 재고 업데이트
             productServiceClient.updateStock(item);
@@ -121,16 +121,24 @@ public class OrderService {
             totalPrice += productPrice * item.getQuantity();
         }
 
+        // 총 가격 업데이트
+        order.setTotalPrice(totalPrice);
+        try {
+            orderRepository.save(order);
+        } catch (Exception e) {
+            throw new RuntimeException("Order update failed", e);
+        }
+
         // 결제 정보 생성
         Payment payment = new Payment();
         payment.setOrderId(order.getId());
         payment.setPaymentDate(new Date());
-        payment.setPrice(totalPrice); // 총 가격
+        payment.setPrice(totalPrice);  // 총 가격
         payment.setPaymentMethod("card");
         try {
             paymentRepository.save(payment);
         } catch (Exception e) {
-            throw e;
+            throw new RuntimeException("Payment creation failed", e);
         }
     }
 
