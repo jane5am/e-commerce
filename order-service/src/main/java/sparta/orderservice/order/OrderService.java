@@ -1,5 +1,6 @@
 package sparta.orderservice.order;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,10 @@ public class OrderService {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+
     // 유저 아이디로 주문 목록 조회
     @Transactional
     public List<Order> getOrdersByUserId(int userId) {
@@ -76,6 +81,8 @@ public class OrderService {
 
     @Transactional
     public void createOrder(int userId, List<CreateOrderDto> orderItems) {
+
+        System.out.println("88888888888");
         // 주문 생성
         Order order = new Order();
         order.setUserId(userId);
@@ -84,6 +91,7 @@ public class OrderService {
 
         try {
             orderRepository.save(order);
+            System.out.println("99999999");
         } catch (Exception e) {
             throw new RuntimeException("Order creation failed", e);
         }
@@ -113,8 +121,10 @@ public class OrderService {
                 throw new RuntimeException("OrderItem creation failed", e);
             }
 
-            // 재고 업데이트
-            productServiceClient.updateStock(item);
+//            // 재고 업데이트
+//            productServiceClient.updateStock(item);
+            // RabbitMQ를 통해 재고 업데이트 요청 전송
+            rabbitTemplate.convertAndSend("product-update-queue", item);
 
             // 각 상품의 가격을 가져와 총 가격 계산
             int productPrice = productServiceClient.getProductPrice(item.getProductId());
