@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sparta.orderservice.dto.CreateOrderDto;
+import sparta.common.messages.CreateOrderDto;
 import sparta.productservice.domain.Product;
 import sparta.productservice.dto.ResponseMessage;
 import sparta.productservice.dto.product.CreateProductDto;
@@ -95,10 +95,11 @@ public class ProductController {
 
 
     // Order-Service : 재고 업데이트
-    @PutMapping("/updateStock")
-    public void updateStock(@RequestBody CreateOrderDto createOrderDto) {
-        productService.updateStock(createOrderDto);
-    }
+    // rabbitMQ로 대체
+//    @PutMapping("/updateStock")
+//    public void updateStock(@RequestBody CreateOrderDto createOrderDto) {
+//        productService.updateStock(createOrderDto);
+//    }
 
 
     // Order-Service : 재고 되돌리기
@@ -109,9 +110,10 @@ public class ProductController {
 
 
     // Order-Service : 가격 가져오기
-    @GetMapping("/getPrice")
-    public int getProductPrice(@RequestParam("productId") int productId) {
-        return productService.getProductPrice(productId);
-    }
+    // rabbitMQ로 대체
+//    @GetMapping("/getPrice")
+//    public int getProductPrice(@RequestParam("productId") int productId) {
+//        return productService.getProductPrice(productId);
+//    }
 
 }

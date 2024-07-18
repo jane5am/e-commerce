@@ -6,10 +6,11 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sparta.common.messages.CreateOrderDto;
 import sparta.orderservice.ResponseMessage;
+import sparta.orderservice.config.RabbitMQConfig;
 import sparta.orderservice.domain.Order;
 import sparta.orderservice.dto.OrderItemDto;
-import sparta.orderservice.dto.CreateOrderDto;
 import sparta.orderservice.message.OrderMessage;
 
 import java.util.List;
@@ -61,7 +62,7 @@ public class OrderController {
     }
 
 
-    // 주문 하기
+    // 주문 하기 ( 메시지 큐 적용 안된 코드 )
 //    @PostMapping("/createOrder")
 //    public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody List<CreateOrderDto> orderItems) {
 //        int userId = extractUserIdFromRequest(request);
@@ -80,9 +81,8 @@ public class OrderController {
     public ResponseEntity<ResponseMessage> createOrder(HttpServletRequest request, @RequestBody List<CreateOrderDto> orderItems) {
         int userId = extractUserIdFromRequest(request);
 
-        // 주문 요청을 RabbitMQ 큐에 추가
         OrderMessage orderMessage = new OrderMessage(userId, orderItems);
-        rabbitTemplate.convertAndSend("order-queue", orderMessage);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.ORDER_QUEUE, orderMessage);
 
         ResponseMessage response = ResponseMessage.builder()
                 .data(orderItems)
