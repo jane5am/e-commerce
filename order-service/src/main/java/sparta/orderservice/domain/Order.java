@@ -26,6 +26,6 @@ public class Order extends CommonEntity {
     @Column(name = "orderDate", nullable = false)
     private Date orderDate;
 
-    @Column(name = "totalAmount", nullable = false)
-    private int totalAmount;
+    @Column(name = "totalPrice", nullable = false)
+    private int totalPrice;
 }

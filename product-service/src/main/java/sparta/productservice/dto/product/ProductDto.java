@@ -13,4 +13,7 @@ public class ProductDto {
     private int price;
     private String description;
     private String exposeYsno;
+
+    public ProductDto(int productId, String name, int price, String description, String exposeYsno, int i) {
+    }
 }

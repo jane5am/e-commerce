@@ -33,9 +33,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'mysql:mysql-connector-java:8.0.28'
-    implementation project(path: ':order-service')
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation project(':common')
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

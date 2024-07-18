@@ -8,4 +8,7 @@ import lombok.EqualsAndHashCode;
 public class CreateUserRequestDto extends UserCommonDto {
 
     private String name;
+    private String phone;
+    private String address;
+
 }

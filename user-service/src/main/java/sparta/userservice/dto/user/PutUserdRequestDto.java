@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class PutUserRequestDto {
-    private int userId;
-    private String email;
+public class PutUserdRequestDto {
+    private String phone;
+    private String address;
 }

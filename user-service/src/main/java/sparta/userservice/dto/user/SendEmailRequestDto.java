@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SendEmailRequestDto {
 
-    private int userId;
-
     @Email
     private String email;
 }

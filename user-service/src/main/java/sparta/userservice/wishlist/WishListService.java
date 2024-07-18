@@ -1,6 +1,5 @@
 package sparta.userservice.wishlist;
 
-import jakarta.ws.rs.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import sparta.userservice.domain.WishList;
@@ -26,9 +25,10 @@ public class WishListService {
         return wishListRepository.findByUserId(userId);
     }
 
+    // 위시리스트 생성
     public WishList addToWishList(int userId, CreateWishListRequestDto createWishListRequestDto) {
         try {
-            Optional<WishList> existingWishList = wishListRepository.findByUserIdAndProductId(userId, Integer.parseInt(createWishListRequestDto.getProductId()));
+            Optional<WishList> existingWishList = wishListRepository.findByUserIdAndProductId(userId, createWishListRequestDto.getProductId());
 
             WishList wishList;
             if (existingWishList.isPresent()) {
@@ -37,7 +37,7 @@ public class WishListService {
             } else {
                 wishList = new WishList();
                 wishList.setUserId(userId);
-                wishList.setProductId(Integer.parseInt(createWishListRequestDto.getProductId()));
+                wishList.setProductId(createWishListRequestDto.getProductId());
                 wishList.setQuantity(createWishListRequestDto.getQuantity());
             }
 

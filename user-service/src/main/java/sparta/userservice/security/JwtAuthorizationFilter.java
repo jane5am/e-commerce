@@ -26,27 +26,36 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
-
         // 로그인 경로에 대한 예외 처리
+        String signupPath = "/api/v1/user/signup";
         String loginPath = "/api/v1/user/login";
-        if (req.getRequestURI().equals(loginPath)) {
+        String sendCertificationPath = "/api/v1/user/send-certification";
+        String checkCertificationPath = "/api/v1/user/email-certification";
+
+        String requestURI = req.getRequestURI();
+
+        if (requestURI.equals(loginPath) || requestURI.equals(sendCertificationPath) || requestURI.equals(checkCertificationPath) || requestURI.equals(signupPath)) {
             filterChain.doFilter(req, res);
             return;
         }
 
         // 헤더에서 userId와 role을 추출
-        String userIdStr = req.getHeader("x-claim-userid");
-        String role = req.getHeader("x-claim-role");
+        String userIdStr = req.getHeader("X-Claim-userId");
+        String role = req.getHeader("X-Claim-role");
 
         if (StringUtils.hasText(userIdStr) && StringUtils.hasText(role)) {
             try {
                 setAuthentication(userIdStr, role);
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("Authentication error: {}", e.getMessage(), e);
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                res.getWriter().write("{\"error\": \"Authentication error\", \"message\": \"" + e.getMessage() + "\"}");
                 return;
             }
         } else {
             log.error("Missing userId or role in headers");
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Missing userId or role in headers\"}");
             return;
         }
 
@@ -54,17 +63,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     // 인증 처리
-    public void setAuthentication(String username, String role) {
+    public void setAuthentication(String userId, String role) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        Authentication authentication = createAuthentication(username, role);
+        Authentication authentication = createAuthentication(userId, role);
         context.setAuthentication(authentication);
-
         SecurityContextHolder.setContext(context);
     }
 
     // 인증 객체 생성
-    private Authentication createAuthentication(String username, String role) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    private Authentication createAuthentication(String userId, String role) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 }

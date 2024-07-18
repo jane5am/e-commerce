@@ -6,14 +6,8 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sparta.userservice.domain.User;
-import sparta.userservice.domain.WishList;
-import sparta.userservice.dto.user.CreateUserRequestDto;
-import sparta.userservice.dto.user.PutUserRequestDto;
-import sparta.userservice.dto.user.SendEmailRequestDto;
-import sparta.userservice.dto.user.UserCommonDto;
+import sparta.userservice.dto.user.*;
 import sparta.userservice.provider.email.EmailProvider;
-import sparta.userservice.wishlist.WishListRepository;
-import sparta.userservice.utils.GenerateCertificationNumberUtil;
 import sparta.userservice.utils.JwtUtil;
 
 import java.util.List;
@@ -28,6 +22,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final EmailProvider emailProvider;
+    private final RedisService redisService;
 
     //회원가입
     public User createUser(CreateUserRequestDto createUserRequestDto) throws BadRequestException {
@@ -46,6 +41,8 @@ public class UserService {
         User user = new User();
         user.setEmail(createUserRequestDto.getEmail());
         user.setName(createUserRequestDto.getName());  // username 설정
+        user.setAddress(createUserRequestDto.getAddress());
+        user.setPhone(createUserRequestDto.getPhone());
         user.setType("web");
         user.setPassword(passwordEncoder.encode(createUserRequestDto.getPassword())); // 비밀번호 암호화
 
@@ -85,10 +82,6 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-
-    // 이메일 인증
-
-
     // 전체 유저 조회
     public List<User> getAllUsers() {
 
@@ -108,19 +101,43 @@ public class UserService {
     }
 
 
-    // 회원 수정
-    public User updateUser(PutUserRequestDto putUserRequestDto) {
-
-        Optional<User> optionalUser = userRepository.findById(putUserRequestDto.getUserId());
+    // 회원 비밀번호 수정
+    public User updatePassword(int userId, PutPasswordRequestDto putPasswordRequestDto) throws BadRequestException {
+        Optional<User> optionalUser = userRepository.findById(userId);
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            user.setEmail(putUserRequestDto.getEmail());
+
+            if (putPasswordRequestDto.getPassword() != null && !putPasswordRequestDto.getPassword().isEmpty()) {
+                // 비밀번호 검증
+                String password = putPasswordRequestDto.getPassword();
+                if (!isPasswordValid(password)) {
+                    throw new BadRequestException("Password does not meet the security requirements");
+                }
+
+                user.setPassword(passwordEncoder.encode(putPasswordRequestDto.getPassword()));  // 비밀번호 암호화
+            }
 
             return userRepository.save(user);
-
         } else {
-            throw new RuntimeException("User not found with id " + putUserRequestDto.getUserId());
+            throw new RuntimeException("User not found with id " + userId);
+        }
+    }
+
+    // 회원 정보 수정
+    public User updateUser(int userId, PutUserdRequestDto putUserdRequestDto) throws BadRequestException {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            // 이부분: 회원 정보 업데이트
+            user.setPhone(putUserdRequestDto.getPhone());
+            user.setAddress(putUserdRequestDto.getAddress());
+
+            return userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found with id " + userId);
         }
     }
 
@@ -134,30 +151,31 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public void emailCertification(SendEmailRequestDto sendEmailRequestDto) throws BadRequestException {
+
+    public void checkCertification(EmailCheckRequestDto emailCheckRequestDto) throws BadRequestException {
 
         try {
+            int userId = emailCheckRequestDto.getUserId();
+            String email = emailCheckRequestDto.getEmail();
+            String certificationNumber = emailCheckRequestDto.getCertificationNumber();
 
-            int userId = sendEmailRequestDto.getUserId();
-            String email = sendEmailRequestDto.getEmail();
+            // Redis에서 인증 코드 확인
+            String key = "cert:" + email;
+            String storedCertificationNumber = (String) redisService.getData(key);
 
-            Optional<User> existedUser = userRepository.findByEmail(email);
-            if(existedUser.isPresent()) {
-                throw new BadRequestException("이미 가입된 이메일 입니다.");
+            if (storedCertificationNumber == null || !storedCertificationNumber.equals(certificationNumber)) {
+                throw new BadRequestException("인증 번호가 일치하지 않거나 만료되었습니다.");
             }
 
-            String certificationNumber = GenerateCertificationNumberUtil.getCertificationNumber();
-            boolean isSuccessed = emailProvider.sendCertificationMail(email, certificationNumber);
-            if( !isSuccessed ){
-                throw new BadRequestException("이메일 인증 메일 전송에 실패했습니다.");
-            }
+            // 인증이 완료되면 Redis에서 인증 코드를 삭제
+            redisService.deleteData(key);
 
-
-        }catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new BadRequestException("이메일 인증 메일 전송에 실패했습니다.");
+            throw new BadRequestException("데이터 베이스 에러입니다.");
         }
     }
+
 }
 
 

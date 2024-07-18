@@ -1,6 +1,7 @@
 package sparta.userservice.user;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -11,21 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import sparta.userservice.client.ProductServiceClient;
 import sparta.userservice.client.OrderServiceClient;
 import sparta.userservice.domain.User;
-import sparta.userservice.domain.WishList;
 import sparta.userservice.dto.ResponseMessage;
-import sparta.userservice.dto.product.ProductDto;
 import sparta.userservice.dto.order.OrderDto;
-import sparta.userservice.dto.user.CreateUserRequestDto;
-import sparta.userservice.dto.user.PutUserRequestDto;
-import sparta.userservice.dto.user.SendEmailRequestDto;
-import sparta.userservice.dto.user.UserCommonDto;
+import sparta.userservice.dto.user.*;
 import sparta.userservice.provider.jwt.JwtBlacklist;
 import sparta.userservice.security.UserDetailsImpl;
 
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -36,6 +31,7 @@ public class UserController {
     private final JwtBlacklist jwtBlacklist;
     private final ProductServiceClient productServiceClient;
     private final OrderServiceClient orderServiceClient;
+    private final EmailService emailService;
     private Environment env;
 
     @GetMapping("/health-check")
@@ -82,19 +78,44 @@ public class UserController {
         return ResponseEntity.ok(responseMessage);
     }
 
-    // 이메일 인증
-    @PostMapping("/email-certification")
-    public ResponseEntity<ResponseMessage> emailCertification(@RequestBody SendEmailRequestDto sendEmailRequestDto) throws BadRequestException {
-        userService.emailCertification(sendEmailRequestDto);
+    // 인증 이메일 전송
+    @PostMapping("/send-certification")
+    public ResponseEntity<ResponseMessage> sendCertificationEmail(@RequestBody SendEmailRequestDto sendEmailRequestDto) {
+        emailService.sendCertificationEmail(sendEmailRequestDto);
 
-        ResponseMessage responseMessage = ResponseMessage.builder()
-                .data("이메일 인증 성공입니다!")
+        ResponseMessage response = ResponseMessage.builder()
+                .data("")
                 .statusCode(200)
-                .resultMessage("email-certification successful")
+                .resultMessage("Email sent successfully")
                 .build();
 
-        return ResponseEntity.ok(responseMessage);
+        return ResponseEntity.ok(response);
     }
+
+    // 이메일 인증
+    @PostMapping("/email-certification")
+    public ResponseEntity<ResponseMessage> emailCertification(@RequestBody EmailCheckRequestDto emailCheckRequestDto) throws BadRequestException {
+        try {
+            userService.checkCertification(emailCheckRequestDto);
+
+            ResponseMessage response = ResponseMessage.builder()
+                    .data("")
+                    .statusCode(200)
+                    .resultMessage("Certification successful")
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } catch (BadRequestException e) {
+            ResponseMessage response = ResponseMessage.builder()
+                    .data("")
+                    .statusCode(400)
+                    .resultMessage(e.getMessage())
+                    .build();
+
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
 
     // 유저 전체 조회
     @GetMapping
@@ -124,10 +145,25 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // 회원 수정
-    @PutMapping()
-    public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserRequestDto putUserRequestDto) {
-        User updatedUser = userService.updateUser(putUserRequestDto); // exception은 서비스에서 내주기
+    // 회원 비밀번호 수정
+    @PutMapping("/update-password")
+    public ResponseEntity<ResponseMessage> updatePassword(@RequestBody PutPasswordRequestDto putPasswordRequestDto, HttpServletRequest request) throws BadRequestException {
+        int userId = extractUserIdFromRequest(request);
+        User updatedUser = userService.updatePassword(userId,putPasswordRequestDto); // exception은 서비스에서 내주기
+
+        ResponseMessage response = ResponseMessage.builder()
+                .data(updatedUser)
+                .statusCode(200)
+                .resultMessage("User updated successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    // 회원 정보 수정
+    @PutMapping("/update-user")
+    public ResponseEntity<ResponseMessage> updateUser(@RequestBody PutUserdRequestDto putUserdRequestDto, HttpServletRequest request) throws BadRequestException {
+        int userId = extractUserIdFromRequest(request);
+        User updatedUser = userService.updateUser(userId, putUserdRequestDto); // exception은 서비스에서 내주기
 
         ResponseMessage response = ResponseMessage.builder()
                 .data(updatedUser)
@@ -200,4 +236,22 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    private int extractUserIdFromRequest(HttpServletRequest request) {
+        String userIdHeader = request.getHeader("x-claim-userid");
+        if (userIdHeader == null) {
+            throw new RuntimeException("Missing user ID in headers");
+        }
+
+        int userId;
+        try {
+            userId = Integer.parseInt(userIdHeader);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid user ID format in headers");
+        }
+
+        return userId;
+    }
+
 }
