@@ -8,6 +8,11 @@
 
 2024.06 ~ 2024.07 (4주)
 
+## API 명세
+https://documenter.getpostman.com/view/35026905/2sA3kUGMeX
+
+<br/>
+
 ## 🛠 기술스택
 
 
