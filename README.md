@@ -20,6 +20,7 @@ https://documenter.getpostman.com/view/35026905/2sA3kUGMeX
 
 <br/>
 
+## 🔍 아키텍처
 ## v1: Redis를 사용한 이메일 인증
 
 <img width="1108" alt="스크린샷 2024-07-20 오전 3 50 34" src="https://github.com/user-attachments/assets/2f254bd0-ac4d-4b2c-a1f4-18f09c5b1b39">
@@ -39,7 +40,7 @@ https://documenter.getpostman.com/view/35026905/2sA3kUGMeX
 - Redis가 인증 코드의 저장을 처리.
 - 사용자가 제출한 인증 코드는 Redis와 대조하여 확인.
 
----
+<br/>
 
 ## v2: Spring Cloud를 사용한 마이크로서비스 아키텍처
 
@@ -60,7 +61,7 @@ https://documenter.getpostman.com/view/35026905/2sA3kUGMeX
 **아키텍처:**
 - Eureka 서버를 통해 마이크로서비스를 등록하고, API Gateway와 Feign Client를 통해 서비스 간 통신을 관리.
 
----
+<br/>
 
 ## v3: RabbitMQ를 사용한 동시성 문제 해결
 
@@ -81,7 +82,7 @@ https://documenter.getpostman.com/view/35026905/2sA3kUGMeX
 **아키텍처:**
 - RabbitMQ를 통해 비동기 통신을 구현하고, EDA를 적용하여 이벤트를 실시간으로 처리.
 
----
+<br/>
 
 ## v4: 쿠버네티스를 통한 트래픽 라우팅 및 모니터링
 
