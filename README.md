@@ -1,5 +1,18 @@
 # E-Commerce
 
+프로젝트 소개
+이커머스 서비스 플랫폼입니다.
+
+프로젝트 진행기간
+2024.06 ~ 2024.07 (4주)
+
+## 🛠 기술스택
+
+
+<img src="https://img.shields.io/badge/Spring-6DB33F?style=flat-square&logo=Spring&logoColor=white">
+
+<br/>
+
 ## v1: Redis를 사용한 이메일 인증
 
 <img width="1108" alt="스크린샷 2024-07-20 오전 3 50 34" src="https://github.com/user-attachments/assets/2f254bd0-ac4d-4b2c-a1f4-18f09c5b1b39">
