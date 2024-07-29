@@ -29,10 +29,6 @@ spec:
           image: hyejan/product-service:latest
           ports:
             - containerPort: 8081
-          resources:
-            requests:
-              memory: 100Mi
-              cpu: 70m
   strategy:
     type: RollingUpdate
     rollingUpdate:

@@ -23,10 +23,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +51,10 @@ public class OrderService {
 
     @Autowired
     private ProductPriceResponseListener responseListener;
+
+    private final ConcurrentHashMap<Long, Integer> priceCache = new ConcurrentHashMap<>();
+    private final long CACHE_EXPIRATION_TIME = TimeUnit.HOURS.toMillis(1);
+    private final ConcurrentHashMap<Long, Long> cacheTimestamps = new ConcurrentHashMap<>();
 
 
     // 유저 아이디로 주문 목록 조회
@@ -93,7 +94,6 @@ public class OrderService {
     // @Transactional 어노테이션을 통해 트랜잭션을 관리하여 하나의 트랜잭션 내에서 모든 작업을 처리하도록 함
     @Transactional
     public void createOrder(int userId, List<CreateOrderDto> orderItems) {
-        log.info("Starting createOrder");
 
         // 새로운 주문을 생성하고 데이터베이스에 저장
         Order order = createNewOrder(userId);
@@ -107,12 +107,10 @@ public class OrderService {
         // 결제 정보를 생성하고 데이터베이스에 저장
         createPayment(order.getId(), totalPrice);
 
-        log.info("Finished createOrder");
     }
 
     // 새로운 주문을 생성하고 데이터베이스에 저장하는 메서드
     private Order createNewOrder(int userId) {
-        log.info("Starting createNewOrder");
 
         Order order = new Order();
         order.setUserId(userId);
@@ -127,13 +125,11 @@ public class OrderService {
             throw new RuntimeException("Order creation failed", e);
         }
 
-        log.info("Finished createNewOrder");
         return order;
     }
 
     // 주문 항목 목록을 기반으로 전체 주문의 총 가격을 계산하는 메서드
     private int calculateTotalPrice(Order order, List<CreateOrderDto> orderItems) {
-        log.info("Starting calculateTotalPrice");
 
         List<CompletableFuture<Integer>> futureList = orderItems.stream()
                 .map(item -> CompletableFuture.supplyAsync(() -> {
@@ -155,32 +151,27 @@ public class OrderService {
             throw new RuntimeException("Failed to complete order price calculations", e);
         }
 
-        log.info("Finished calculateTotalPrice");
         return totalPrice;
     }
 
     // 새로운 배송 정보를 생성하고 데이터베이스에 저장하는 메서드
     private Shipment createShipment() {
-        log.info("Starting createShipment");
 
         Shipment shipment = new Shipment();
         shipment.setStatus(Shipment.ShipmentStatus.ORDERED);
 
         try {
             shipmentRepository.save(shipment);
-            log.info("Shipment created with ID: " + shipment.getId());
         } catch (Exception e) {
             log.error("Shipment creation failed", e);
             throw new RuntimeException("Shipment creation failed", e);
         }
 
-        log.info("Finished createShipment");
         return shipment;
     }
 
     // 새로운 주문 항목을 생성하고 데이터베이스에 저장하는 메서드
     private OrderItem createOrderItem(int orderId, CreateOrderDto item, int shipmentId) {
-        log.info("Starting createOrderItem");
 
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderId(orderId);
@@ -190,23 +181,30 @@ public class OrderService {
 
         try {
             orderItemRepository.save(orderItem);
-            log.info("OrderItem created with ID: " + orderItem.getId());
         } catch (Exception e) {
             log.error("OrderItem creation failed", e);
             throw new RuntimeException("OrderItem creation failed", e);
         }
 
-        log.info("Finished createOrderItem");
         return orderItem;
     }
 
     // 제품의 가격을 요청하는 메서드
     private int requestProductPrice(CreateOrderDto item) {
-        log.info("Starting requestProductPrice");
+
+        long productId = item.getProductId();
+        Integer cachedPrice = priceCache.get(productId);
+        Long cachedTime = cacheTimestamps.get(productId);
+        long currentTime = System.currentTimeMillis();
+
+        // 캐시에 가격이 존재하고 유효 기간 내에 있으면 캐시된 가격 반환
+        if (cachedPrice != null && cachedTime != null && (currentTime - cachedTime) < CACHE_EXPIRATION_TIME) {
+            return cachedPrice;
+        }
 
         // ProductPriceRequest 객체 생성
         ProductPriceRequest request = new ProductPriceRequest();
-        request.setProductId(item.getProductId());
+        request.setProductId((int) productId);
 
         // 메시지 큐에 요청 전송
         rabbitTemplate.convertAndSend(RabbitMQConfig.PRODUCT_PRICE_REQUEST_QUEUE, request);
@@ -215,7 +213,9 @@ public class OrderService {
         try {
             // 응답 대기
             productPrice = responseListener.getPrice(20000);
-            log.info("Received product price: " + productPrice);
+            // 캐시에 가격 저장
+            priceCache.put(productId, productPrice);
+            cacheTimestamps.put(productId, currentTime);
         } catch (InterruptedException | TimeoutException e) {
             log.error("Failed to get product price", e);
             throw new RuntimeException("Failed to get product price", e);
@@ -224,6 +224,7 @@ public class OrderService {
         log.info("Finished requestProductPrice");
         return productPrice;
     }
+
     // 제품의 재고를 업데이트하는 메서드
     private void updateProductStock(CreateOrderDto item) {
         log.info("Starting updateProductStock");

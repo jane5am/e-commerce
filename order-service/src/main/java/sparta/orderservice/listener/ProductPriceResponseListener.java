@@ -22,7 +22,6 @@ public class ProductPriceResponseListener {
 
     @RabbitListener(queues = "product-price-response-queue")
     public void onMessage(ProductPriceResponse response) {
-        log.info("Received price: " + response.getPrice() + " for productId: " + response.getProductId());
         lock.lock();
         try {
             this.price = response.getPrice();
@@ -34,7 +33,6 @@ public class ProductPriceResponseListener {
     }
 
     public int getPrice(long timeout) throws InterruptedException, TimeoutException {
-        log.info("Waiting for price with timeout: " + timeout);
         lock.lock();
         try {
             if (!isPriceAvailable) {
@@ -44,7 +42,6 @@ public class ProductPriceResponseListener {
                     throw new TimeoutException("Timeout while waiting for product price response");
                 }
             }
-            log.info("Returning price: " + price);
             return price;
         } finally {
             isPriceAvailable = false; // 상태 리셋
