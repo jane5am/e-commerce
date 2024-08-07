@@ -39,10 +39,6 @@ spec:
             timeoutSeconds: 3
             periodSeconds: 10
             failureThreshold: 3
-          resources:
-            requests:
-              memory: 100Mi
-              cpu: 70m
 
   strategy:
     type: RollingUpdate
