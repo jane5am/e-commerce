@@ -1,21 +1,29 @@
-# E-Commerce
 
-프로젝트 소개<br/>
-이커머스 서비스 플랫폼입니다.
+<p align="center">
+<img width="250" alt="스크린샷 2024-08-09 오전 10 02 09" src="https://github.com/user-attachments/assets/ddcc4b85-0559-46bb-a877-914101fa7d67">
+</p>
+
+# 🚀 프로젝트 소개
+- 프로젝트의 주요 내용은 대용량 트래픽 처리, 동시성 제어 입니다.
+- Veraix는 고객들에게 고객에게 최적화된 쇼핑 경험을 제공하는 이커머스 플랫폼입니다.
 <br/>
 
-프로젝트 진행기간<br/>
-2024.06 ~ 2024.07
+## 📅 프로젝트 진행 기간
+**2024.06 ~ 2024.07**
+
+## 🛠️ 구현기능
+
+
 
 ## API 명세
 https://documenter.getpostman.com/view/35026905/2sA3kUGMeX
 
 <br/>
 
-## 🛠 기술스택
+## 📚 기술스택
+- Spring Boot, MySQL, Redis, Docker, Kubernetes, nGrinder
 
 
-<img src="https://img.shields.io/badge/Spring-6DB33F?style=flat-square&logo=Spring&logoColor=white">
 
 <br/>
 
