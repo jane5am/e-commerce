@@ -41,10 +41,6 @@
 
 <br/>
 
-## 🗂️ API 명세
-
-<br/>
-
 ## 🧑‍💻 ERD
 <img width="1108" alt="스크린샷 2024-07-20 오전 3 50 34" src="https://github.com/user-attachments/assets/98201886-2080-4602-aa3a-c13b969095ef">
 <br/>
