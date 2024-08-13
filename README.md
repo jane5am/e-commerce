@@ -153,4 +153,7 @@
     
 - **실제 개선 사례**
     - **Order-Service 와 Product-Service 수를 3배 늘린 후 트래픽 분산 → 부하 분산 및 속도 개선**
-    <img width="500" alt="스크린샷 2024-08-12 오후 7 28 16" src="https://github.com/user-attachments/assets/bdfaff42-5e20-4a1f-9466-f76cf7679bb8">
+<p align="center" style="margin-top: 16px;">
+  <img width="500" alt="스크린샷" src="https://github.com/user-attachments/assets/bdfaff42-5e20-4a1f-9466-f76cf7679bb8">
+</p>
+
