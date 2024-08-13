@@ -1,33 +1,51 @@
-
-<p align="center">
-<img width="250" alt="스크린샷 2024-08-09 오전 10 02 09" src="https://github.com/user-attachments/assets/ddcc4b85-0559-46bb-a877-914101fa7d67">
-</p>
-
-# 🚀 프로젝트 소개
+# 🚀 E-Commere 프로젝트 소개
 - 프로젝트의 주요 내용은 대용량 트래픽 처리, 동시성 제어 입니다.
-- Veraix는 고객들에게 고객에게 최적화된 쇼핑 경험을 제공하는 이커머스 플랫폼입니다.
+- 사용자에게 최적화된 쇼핑 경험을 제공하는 이커머스 플랫폼입니다.
 <br/>
 
 ## 📅 프로젝트 진행 기간
-**2024.06 ~ 2024.07**
-
-## 🛠️ 구현기능
-
-
-
-## API 명세
-https://documenter.getpostman.com/view/35026905/2sA3kUGMeX
-
-<br/>
+2024.06 ~ 2024.07 (4주)
+<br/><br/>
 
 ## 📚 기술스택
-- Spring Boot, MySQL, Redis, Docker, Kubernetes, nGrinder
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![JPA](https://img.shields.io/badge/JPA-007ACC?style=for-the-badge&logo=hibernate&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
+![nGrinder](https://img.shields.io/badge/nGrinder-000000?style=for-the-badge&logo=ngrinder&logoColor=white)
+<br/><br/>
 
-
+## 🛠️ 구현기능
+1. 사용자 관리
+    - 유저 관리
+       - 회원가입
+       - 로그인
+       - 로그아웃
+     - 위시리스트 관리
+       - 위시리스트 CRUD
+2. 상품 관리
+    - 상품 CRUD
+    - 재고 조회
+3. 주문 관리
+    - 주문 처리
+      - 주문하기
+    - 장바구니 관리
+      - 장바구니 CRUD
+4. 주문 내역
+    - 주문 정보 조회
+    - 주문 취소 및 반품
 
 <br/>
 
-## ERD
+## 🗂️ API 명세
+
+<br/>
+
+## 🧑‍💻 ERD
 <img width="1108" alt="스크린샷 2024-07-20 오전 3 50 34" src="https://github.com/user-attachments/assets/98201886-2080-4602-aa3a-c13b969095ef">
 <br/>
 <br/>
@@ -94,21 +112,3 @@ https://documenter.getpostman.com/view/35026905/2sA3kUGMeX
 
 **아키텍처:**
 - RabbitMQ를 통해 비동기 통신을 구현하고, EDA를 적용하여 이벤트를 실시간으로 처리.
-
-<br/>
-
-## v4: 쿠버네티스를 통한 트래픽 라우팅 및 모니터링
-
-<img width="1088" alt="스크린샷 2024-08-09 오전 9 28 15" src="https://github.com/user-attachments/assets/adf6cad2-94ea-4f20-a111-5f2ed2e7e599">
-
-**문제점:**
-- 다양한 서비스에 대한 트래픽을 효과적으로 라우팅 필요.
-
-**해결책:**
-- 인그레스를 추가하여 쿠버네티스 클러스터 내에서 외부 트래픽을 내부 서비스로 라우팅.
-
-**주요 변경 사항:**
-- 인그레스를 통해 도메인 기반 라우팅을 구현하여 트래픽을 적절한 서비스로 분배.
-
-**아키텍처:**
-- 인그레스를 통해 외부 트래픽을 내부 서비스로 라우팅.
